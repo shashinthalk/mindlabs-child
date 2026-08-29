@@ -1,0 +1,24 @@
+/*
+Theme Name: Hexnity WP Child
+Theme URI: https://hexnity.com
+Template: hex-wp-theme-template
+Description: Child theme of Hexnity WP AI Theme. Inherits all templates (Default/Full Width/Canvas page templates, header, footer, single, archive, etc.) automatically via WordPress's template hierarchy — nothing is duplicated here unless it needs to override the parent.
+Author: Nishan Shashintha
+Author URI: https://shashinthalk.cc
+Version: 1.2.1
+Requires at least: 6.4
+Requires PHP: 8.0
+Text Domain: hexnity-wp-child
+*/
+
+/*
+ * Intentionally empty. The admin-configurable design-token system
+ * (.hex-*/.btn/.card/.form-control/.nav-menu/.accordion/.tabs/etc.)
+ * is compiled Tailwind CSS built and enqueued by the parent theme
+ * (hex-wp-theme-template/assets/css/src/site-theme.css, compiled to
+ * hex-wp-theme-template/assets/css/tailwind.css) — not by this child
+ * theme. This child theme keeps its own copy of
+ * assets/css/src/site-theme.css as an editable reference/override
+ * source only; it is not built or enqueued here. See GUIDELINES.md.
+ * Add override rules directly in this file only for a one-off tweak.
+ */

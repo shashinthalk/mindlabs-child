@@ -1,0 +1,82 @@
+{
+  "actions": [
+    {
+      "date": "2026-08-27",
+      "user_requirement": "Hand-written, ready-to-push starter child theme requested from a session working on the parent theme, so the parent's child-theme fetch-and-install feature could eventually be exercised end-to-end against a real GitHub repo.",
+      "action": "Created style.css (Template: hex-wp-theme-template header) and functions.php (enqueues this theme's own style.css after the parent's compiled Tailwind build, deliberately not the generic 'enqueue parent style.css' child-theme boilerplate, since the parent's real styling was compiled Tailwind CSS, not its style.css body).",
+      "files_touched": [
+        "style.css",
+        "functions.php"
+      ]
+    },
+    {
+      "date": "2026-08-28",
+      "user_requirement": "Theme Options admin page (in the parent theme) used live against this child theme, saving real design-token values (including a manually-tested H2 Desktop Size of 45px, later 85px).",
+      "action": "theme-options.css created/regenerated repeatedly by the parent's hex_build_style_tokens_css(), reflecting Theme Options saves and the reset-to-defaults/px-conversion work done across a long parent-theme session. See the parent's action-map.json for the full history of what changed in this file and why.",
+      "files_touched": [
+        "theme-options.css"
+      ]
+    },
+    {
+      "date": "2026-08-28",
+      "user_requirement": "\"add rules and guidline to child theme (using md file) explaining everything and how the childtheme should modifiy. also add claude md file with instrctions to create the jsons...\" (from the parent-theme session).",
+      "action": "Created GUIDELINES.md (the parent-compatibility contract) and claude.md (session entry point, with instructions to create this project.json/action-map.json rather than fabricate them) \u2014 see the parent theme's action-map.json for full detail, since that session authored these files with only the parent's context.",
+      "files_touched": [
+        "GUIDELINES.md",
+        "claude.md"
+      ]
+    },
+    {
+      "date": "2026-08-28",
+      "user_requirement": "\"u have to move that classes to child theme I think, otherwise how they can be chaged? or modified... move classes to child theme. also in child theme u have to load the tailwind css too. otherwise how to dev know about that.\" Confirmed via clarifying question: a true move (parent theme no longer works standalone), not a copy.",
+      "action": "Became a full Tailwind v4 project in its own right: added package.json (tailwindcss + @tailwindcss/typography + @tailwindcss/cli, matching the parent's versions), assets/css/src/site-theme.css (the entire design-token system moved verbatim from the parent theme's own assets/css/src/site-theme.css -- @theme block, @layer base, @layer components with every .hex-*/.btn/.card/.form-control/.table-styled/.alert/.badge/.nav-menu/.nav-link/.accordion/.tabs/.icon/.prose-override class), and assets/css/src/front.css (imports tailwindcss's theme+utilities layers only -- deliberately skips a second Preflight, already provided by the parent's own build -- plus the typography plugin and ./site-theme.css; @source directives scan the PARENT theme's PHP templates across the sibling directory, since the actual page markup still lives there, confirmed working by finding max-w-6xl -- a utility used in the parent's header.php -- correctly compiled into this theme's own output). Ran a real `npm install` (network available, verified via `npm ping` first) and `npm run build:css`, producing assets/css/tailwind.css. Updated functions.php to enqueue that compiled file (new 'hexnity-wp-child-tailwind' handle, depending on the parent's 'hex-tailwind') before this theme's own style.css. Updated style.css's own comment (previously described the parent as the real styling source; now describes this theme's own build as the source) and bumped Version 1.0.0 -> 1.1.0 in style.css and HEXNITY_WP_CHILD_VERSION in functions.php together. Added .gitignore (/node_modules/) matching the parent theme's own convention (compiled CSS committed, node_modules not). Verified live on http://mindlabz-new.local/: hexnity-wp-child/assets/css/tailwind.css loads correctly in the page's <link> tags, and .entry-title's fluid H2 font-size still computed exactly 74.8333px -- unchanged visually, confirming the move didn't break anything. The parent theme's own compiled CSS was correspondingly stripped of all these classes (see the parent's own action-map.json for that side) -- this theme is now the sole source of the design-system's CSS rules; the parent theme alone (no child theme active) renders with zero component styling, an explicit, confirmed trade-off.",
+      "files_touched": [
+        "package.json",
+        "package-lock.json",
+        "assets/css/src/site-theme.css",
+        "assets/css/src/front.css",
+        "assets/css/tailwind.css",
+        "functions.php",
+        "style.css",
+        ".gitignore"
+      ]
+    },
+    {
+      "date": "2026-08-28",
+      "user_requirement": "Follow-up to the class-move request: this project.json and action-map.json should be created with real, authoritative data now that a session has actually built out this theme's structure first-hand (per this theme's own claude.md instruction to do exactly that, rather than fabricate).",
+      "action": "Created this project.json (real structure/purpose entries for every file that exists in this directory as of the move above) and this action-map.json (backfilled with the real history of every action taken against this theme across all three of its authoring sessions, reconstructed from the parent theme's own action-map.json where this theme was the touched target).",
+      "files_touched": [
+        "project.json",
+        "action-map.json"
+      ]
+    },
+    {
+      "date": "2026-08-29",
+      "user_requirement": "\"no no it should only in main theme. child theme only should has site-theme css and theme options. not tailwind live there. tailwind should come from main theme\" \u2014 a follow-up to reversing the 2026-08-28 move: the parent theme's own site-theme.css/front.css/build were already restored in that session, but this child theme still had its own duplicate Tailwind build (package.json, node_modules, compiled tailwind.css, own enqueue) sitting alongside it. The user clarified this child theme should keep only a reference copy of site-theme.css plus theme-options.css \u2014 no build, no enqueue of its own.",
+      "action": "Removed this child theme's own Tailwind build entirely: deleted package.json, package-lock.json, node_modules/, assets/css/src/front.css (its build entry point), and assets/css/tailwind.css (compiled output). Rewrote functions.php to drop the 'hexnity-wp-child-tailwind' enqueue -- it now only enqueues this theme's plain style.css (get_stylesheet_uri()), dependent on the parent's 'hex-tailwind' handle for load order. Updated style.css's header comment to point at the parent theme's build instead of describing one of its own. Rewrote assets/css/src/site-theme.css's own header comment to mark it explicitly as a reference-only copy with no live effect -- kept in place (not deleted) per the user's instruction that this child theme should still 'has site-theme css', purely so a child-theme developer has an editable starting point to compare against or eventually port into the parent. theme-options.css and its enqueue mechanism (hex_enqueue_child_theme_tokens() in the parent's inc/style-settings.php) were untouched -- that system was never part of this child theme's own build and already matches what the user asked to keep here. Rewrote GUIDELINES.md section 4 to describe the classes as living in the parent theme again, with the 2026-08-28 move documented as reversed history. Updated project.json's meta/structure entries (removed package.json/front.css/tailwind.css entries, rewrote site-theme.css's and functions.php's purpose text). Bumped version 1.1.0 -> 1.2.0 in style.css and functions.php's HEXNITY_WP_CHILD_VERSION.",
+      "files_touched": [
+        "functions.php",
+        "style.css",
+        "assets/css/src/site-theme.css",
+        "GUIDELINES.md",
+        "project.json",
+        "action-map.json",
+        "package.json (deleted)",
+        "package-lock.json (deleted)",
+        "node_modules/ (deleted)",
+        "assets/css/src/front.css (deleted)",
+        "assets/css/tailwind.css (deleted)"
+      ]
+    },
+    {
+      "date": "2026-08-29",
+      "user_requirement": "Full audit of both themes requested from the main theme's session (\"confirm everything industry standed and connected each other\"). This theme's own record of the same action.",
+      "action": "Live-verified (browser, mindlabz-new.local, this theme active) that this theme's style.css was being loaded via two separate <link> tags -- once via the parent theme's own 'hex-style' handle, once via this theme's own 'hexnity-wp-child-style' handle. Tried removing the duplicate by dequeuing+deregistering 'hex-style' inside hexnity_wp_child_enqueue_assets() -- this broke the live site (hex-style/hex-animate/hex-tailwind all stopped rendering, since hex-animate and hex-tailwind both declare 'hex-style' as a WP style dependency and deregistering it broke resolution for all three). Reverted immediately, re-verified live all 5 stylesheets returned, and left the duplicate in place as documented, accepted, low-severity behavior (see ../hex-wp-theme-template/knoladge/child-theme-css-token-architecture.md for the full writeup) -- it's a harmless second <link> tag to an already-cached URL, not a functional defect, and the load-order it provides is what lets a one-off override rule in this theme's style.css win against a Tailwind class. Added an explanatory comment to functions.php recording why 'hex-style' must not be deregistered from here. Bumped version 1.2.0 -> 1.2.1 in style.css and functions.php.",
+      "files_touched": [
+        "functions.php",
+        "style.css",
+        "action-map.json"
+      ]
+    }
+  ]
+}
