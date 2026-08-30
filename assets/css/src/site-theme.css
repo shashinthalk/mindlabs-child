@@ -1,58 +1,84 @@
 /**
- * ⚠️ REFERENCE COPY ONLY — NOT BUILT OR ENQUEUED FROM THIS THEME.
- * The real, live design-token CSS is built and loaded from the parent
- * theme (hex-wp-theme-template/assets/css/src/site-theme.css,
- * compiled to hex-wp-theme-template/assets/css/tailwind.css, enqueued
- * by the parent's own inc/enqueue.php). This file briefly was the
- * live source (2026-08-28) with its own Tailwind build in this child
- * theme — reversed per explicit user correction: "it should be in
- * main theme and should load via main theme." It's kept here only so
- * a child-theme developer has an editable reference/starting point;
- * changes here have no effect on the live site unless copied into the
- * parent theme's own copy and rebuilt there. See
- * hex-wp-theme-template/knoladge/child-theme-css-token-architecture.md.
+ * This child theme's OWN live, directly-enqueued design-system CSS
+ * (see functions.php's hexnity_wp_child_enqueue_meridian_assets(),
+ * conditional on the "Meridian Home" page template). Written as plain,
+ * browser-native CSS — no build step, no Tailwind, no npm — on
+ * 2026-08-29, per explicit user instruction: "only use site-theme.css
+ * and theme options.css dont create any other css." The former
+ * `assets/css/template-meridian.css` duplicate-mirror file this
+ * required (because the original Tailwind-`@theme`-based version of
+ * this file couldn't run unbuilt in a browser) was deleted the same
+ * day — the `@theme { ... }` at-rule at the top of this file was
+ * converted to a plain `:root { ... }` block instead (Tailwind's own
+ * `@theme` compiles to exactly that in its output CSS, so nothing
+ * else in this file needed to change), which is enough on its own to
+ * make every rule below work correctly in any browser with zero
+ * processing.
+ *
+ * The parent theme (hex-wp-theme-template) still separately builds
+ * its OWN copy of this same design system via its own real Tailwind
+ * pipeline (compiled to hex-wp-theme-template/assets/css/tailwind.css,
+ * enqueued as the 'hex-tailwind' handle) — that stays the source of
+ * truth for every OTHER page on the site. This file, enqueued only on
+ * the Meridian Home template, computes identical values for every
+ * class the two files share (`.btn`/`.card`/`.badge`/h1-h6 etc., all
+ * reading the exact same runtime --hex-* custom properties from
+ * theme-options.css) — loading both on that one page is redundant but
+ * harmless, and adds the components that page needs that the parent's
+ * copy doesn't have yet (see the second @layer components block,
+ * appended below the original one).
  *
  * The site's admin-configurable design tokens (Theme Options page,
- * managed by the parent theme "Hexnity WP AI Theme") — ~187 fields
- * across 15 groups, plus any auto-detected custom tokens. Every token
- * here is defined as `var(--hex-{key}, {default})` — pointing at a
- * runtime CSS custom property declared in THIS child theme's own
- * theme-options.css file (a sibling of this file's theme, enqueued
- * directly by the parent's inc/style-settings.php's
- * hex_enqueue_child_theme_tokens()), falling back to the hardcoded
- * default here when nothing's been saved yet, or a value was rejected
- * as unsafe. This indirection is what makes a change in the parent's
- * Theme Options admin page apply on the front end immediately, with
- * no rebuild: Tailwind bakes in a reference to the runtime variable,
- * not the value itself. See the parent theme's
- * knoladge/child-theme-css-token-architecture.md for the full
- * architecture.
+ * managed by the parent theme "Hexnity WP AI Theme") — plus any
+ * auto-detected custom tokens. Every token here is defined as
+ * `var(--hex-{key}, {default})` — pointing at a runtime CSS custom
+ * property declared in THIS child theme's own theme-options.css file
+ * (a sibling of this file, enqueued directly by the parent's
+ * inc/style-settings.php's hex_enqueue_child_theme_tokens()),
+ * falling back to the hardcoded default here when nothing's been
+ * saved yet, or a value was rejected as unsafe. This indirection is
+ * what makes a change in the Theme Options admin page apply on the
+ * front end immediately, with no rebuild — this file itself never
+ * needs re-processing, only theme-options.css's stored values change.
  *
  * The 11 text-size tokens (`--text-h1`…`--text-h6`, `--text-body`,
  * `--text-lead`, `--text-large`, `--text-small`, `--text-meta`) each
- * have a flat px `{default}` — same desktop value the parent's
- * hex_get_style_schema() ships — used when nothing's been saved yet,
- * or a value was rejected as unsafe. `--hex-{key}-size` (once this
- * child theme's theme-options.css has one, normally via a Theme
- * Options save) still wins outright over this fallback. This layer
- * previously used a fluid `clamp()` default; removed per explicit
- * user request. See the parent's `knoladge/fluid-typography-clamp.md`.
+ * have a flat px `{default}` fallback, used when nothing's been saved
+ * yet, or a value was rejected as unsafe. `--hex-{key}-size` (once
+ * theme-options.css has one, normally via a Theme Options save) still
+ * wins outright over this fallback.
  *
- * Every @theme name here is deliberately distinct from Tailwind's own
- * default token names — EXCEPT the "Global" radius scale
- * (--radius-sm/md/lg), which deliberately DOES override Tailwind's
- * built-in rounded-sm/md/lg utilities everywhere they're used,
- * site-wide, the way YOOtheme's own global radius setting works.
+ * The "Global" radius scale (--radius-sm/md/lg) is the one exception
+ * to "every name here is just this file's own internal alias" — in
+ * the parent's real Tailwind build, that specific pair of names also
+ * overrides Tailwind's own built-in rounded-sm/md/lg utility classes
+ * site-wide (irrelevant here, since this file isn't processed by
+ * Tailwind and this page's own markup doesn't use those utilities
+ * directly).
  *
- * See the parent theme's features/design-system.md for the full
- * reference on which class to use for what — that reference document
- * still lives in the parent, since it documents the whole system
- * (parent + this child theme together), not just this file.
+ * Font families: use ONLY the 4 real Theme Options font fields
+ * (--hex-font-heading, --hex-font-body, --hex-font-accent,
+ * --hex-font-mono) — never a one-off font-family declaration in a
+ * component rule. Headings (h1-h6) and body text get theirs for free
+ * from the @layer base rules below; anything else needing the accent
+ * or mono treatment uses the .font-accent / .font-mono utility
+ * classes (see the second @layer components block) applied directly
+ * in the HTML.
+ *
+ * 2026-08-29: a second @layer components block was appended at the
+ * end of this file — the component classes built for the "Concept B:
+ * Meridian" page template (.hero/.hero-card/.rows/.row-item/.dark-band/
+ * .stats-grid/.brand-grid/.quote-block/.compliance-box/.paths-split/
+ * .form-split/.footer-grid/.logo-strip/.hex-container, the
+ * .font-accent/.font-mono utilities, plus a .btn-ghost button variant,
+ * two badge variants (.badge-outline/.badge-mono), and a hover
+ * underline added to the existing .nav-link) — written in the exact
+ * same var(--hex-{key}, {default}) pattern as everything above.
  *
  * @package HexnityWPChild
  */
 
-@theme {
+:root {
 	/*
 	 * Typography: heading levels (size/line-height/letter-spacing/weight).
 	 * --text-h{n}'s fallback is a flat px value (no clamp()/viewport
@@ -163,7 +189,7 @@
 	body {
 		background-color: var(--color-site-body-bg);
 		color: var(--color-site-body-text);
-		font-family: var(--hex-body-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+		font-family: var(--hex-font-body, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
 		font-size: var(--text-body);
 		line-height: var(--leading-body);
 	}
@@ -174,7 +200,7 @@
 	h4,
 	h5,
 	h6 {
-		font-family: var(--hex-heading-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+		font-family: var(--hex-font-heading, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
 	}
 
 	h1 {
@@ -839,5 +865,931 @@
 	.icon-lg {
 		width: var(--size-icon-lg);
 		height: var(--size-icon-lg);
+	}
+}
+
+
+/*
+ * "Concept B: Meridian" page components — added 2026-08-29, corrected
+ * 2026-08-29. See this file's header comment for the live-effect
+ * caveat. IMPORTANT re: var(--hex-spacing-*, fallback) — the
+ * --hex-spacing-xs...2xl scale is a fixed 6-step scale (8/16/24/32/
+ * 48/64) and was deliberately left unchanged (see theme-options.css's
+ * own header comment) rather than force the concept's many one-off
+ * gap/padding values onto it. Because those tokens ARE already
+ * defined, writing var(--hex-spacing-md, 26px) does NOT fall back to
+ * 26px — the real, already-set 24px wins outright, silently rendering
+ * the wrong pixel value. So below, every spacing/padding/gap value
+ * that doesn't exactly equal one of those six numbers is a plain
+ * literal, not a var() call — pixel-perfect over false consistency.
+ * Only radius/button/form/card fields and colors/fonts were actually
+ * overwritten in theme-options.css to match the concept, so var() is
+ * correct and safe to use for those. Two new .badge-* variants are
+ * added here (.badge-outline, .badge-mono) because the concept uses
+ * two distinct tag/pill treatments that don't match badge-default/
+ * -primary/etc.
+ */
+@layer components {
+	/* Font-family utilities — the only two of the 4 real Theme Options font fields not already applied for free by the @layer base h1-h6/body rules above. */
+	.font-accent {
+		font-family: var(--hex-font-accent, serif);
+	}
+
+	.font-mono {
+		font-family: var(--hex-font-mono, ui-monospace, monospace);
+	}
+
+	.hex-container {
+		max-width: 1160px;
+		margin-inline: auto;
+		padding-inline: 28px;
+	}
+
+	.spacer {
+		flex: 1;
+	}
+
+	.section-tight-top {
+		padding-top: 0;
+	}
+
+	.section-tight-bottom {
+		padding-bottom: 0;
+	}
+
+	/* Button variant — mockup's outlined "ghost" button (neutral border, not the primary-colored .btn-outline above). */
+	.btn-ghost {
+		background-color: transparent;
+		color: var(--hex-color-body-text, #111827);
+		box-shadow: inset 0 0 0 1px var(--hex-color-border-strong, #d1d5db);
+	}
+
+	.btn-ghost:hover {
+		background-color: var(--hex-card-background, #fff);
+		box-shadow: inset 0 0 0 1px var(--hex-color-body-text, #111827);
+	}
+
+	.btn-submit {
+		justify-content: center;
+		margin-top: 2px;
+	}
+
+	/* Badge variants — the concept's two distinct tag/pill treatments. */
+	.badge-outline {
+		background-color: transparent;
+		color: var(--hex-color-muted-text);
+		font-weight: 400;
+		padding: 4px 9px;
+		border: 1px solid var(--hex-color-border-strong);
+	}
+
+	.badge-mono {
+		background-color: var(--hex-color-muted);
+		color: var(--hex-color-secondary);
+		font-weight: 400;
+		letter-spacing: .05em;
+		padding: 9px 13px;
+		border: 1px solid var(--hex-color-border-strong);
+		border-radius: 6px;
+		white-space: nowrap;
+	}
+
+	/* Nav link hover underline — additive to the .nav-link rule above. */
+	.nav-link {
+		position: relative;
+	}
+
+	.nav-link::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: -1px;
+		width: 0;
+		height: 1.5px;
+		background: var(--hex-nav-link-hover-color, #2563eb);
+		transition: width 240ms ease;
+	}
+
+	.nav-link:hover::after {
+		width: 100%;
+	}
+
+	/* Header nav / logo. */
+	.site-nav {
+		display: flex;
+		align-items: center;
+		gap: 36px;
+		height: 74px;
+	}
+
+	.site-logo {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		letter-spacing: -.01em;
+	}
+
+	.site-logo .logo-mark {
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
+		flex: 0 0 26px;
+		background: var(--hex-color-primary);
+		display: grid;
+		place-items: center;
+	}
+
+	footer .site-logo {
+		color: #fff;
+	}
+
+	footer .site-logo .logo-mark {
+		background: var(--hex-color-accent);
+	}
+
+	.footer-grid .site-logo {
+		margin-bottom: 18px;
+	}
+
+	.site-tel {
+		color: var(--hex-color-secondary);
+	}
+
+	.lbl-short {
+		display: none;
+	}
+
+	/* Eyebrow / lede text utilities. */
+	.eyebrow {
+		letter-spacing: .14em;
+		text-transform: uppercase;
+		color: var(--hex-color-muted-text);
+		display: block;
+		margin-bottom: 20px;
+	}
+
+	.eyebrow b {
+		color: var(--hex-color-accent);
+		font-weight: 450;
+	}
+
+	.dark-band .eyebrow,
+	.form-split-side .eyebrow {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 50%, transparent);
+	}
+
+	.dark-band .eyebrow b {
+		color: var(--hex-color-primary-light);
+	}
+
+	.lede {
+		color: var(--hex-color-secondary);
+		max-width: 58ch;
+		line-height: 1.68;
+	}
+
+	.dark-band .lede {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 72%, transparent);
+	}
+
+	.hero .lede {
+		margin-top: 26px;
+	}
+
+	.dark-band-grid .lede {
+		margin-top: 20px;
+	}
+
+	.sec-head p {
+		margin-top: 18px;
+	}
+
+	.accent-text {
+		font-style: italic;
+		color: var(--hex-color-accent);
+	}
+
+	section {
+		padding: var(--hex-section-padding-xl) 0;
+	}
+
+	.sec-head {
+		max-width: 680px;
+		margin-bottom: 56px;
+	}
+
+	/*
+	 * Page hero — a plain title/breadcrumb band for ordinary content
+	 * pages that use the parent's own header/footer (not the full
+	 * split hero + hero-card layout of .hero, which is only for the
+	 * standalone Meridian-style landing page). Generic name/pattern per
+	 * TEMPLATE-CONVERSION-GUIDE.md step 6 so any future non-landing-
+	 * page template can reuse it.
+	 */
+	.page-hero {
+		padding: var(--hex-section-padding-xl) 0 var(--hex-section-padding-lg);
+		background: var(--color-site-section-muted);
+	}
+
+	.page-hero h1 {
+		max-width: 20ch;
+	}
+
+	.page-hero .lede {
+		margin-top: 20px;
+	}
+
+	.breadcrumb {
+		display: block;
+		margin-bottom: var(--spacing-md);
+		color: var(--hex-color-muted-text);
+	}
+
+	.breadcrumb a {
+		color: inherit;
+	}
+
+	.breadcrumb a:hover {
+		color: var(--hex-color-primary);
+	}
+
+	/* Hero. */
+	.hero {
+		padding: 86px 0 0;
+		position: relative;
+	}
+
+	.hero-inner {
+		display: grid;
+		grid-template-columns: 1.15fr .85fr;
+		gap: 56px;
+		align-items: end;
+	}
+
+	.hero-cta {
+		display: flex;
+		gap: 12px;
+		margin-top: 34px;
+		flex-wrap: wrap;
+	}
+
+	.hero-card {
+		background: var(--hex-color-inverse-background);
+		color: var(--hex-color-inverse-text);
+		border-radius: var(--radius-md);
+		padding: 34px 30px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.hero-card::after {
+		content: '';
+		position: absolute;
+		right: -70px;
+		bottom: -70px;
+		width: 220px;
+		height: 220px;
+		border-radius: 50%;
+		background: color-mix(in srgb, var(--hex-color-primary) 22%, transparent);
+		filter: blur(50px);
+	}
+
+	.hero-card-label {
+		letter-spacing: .14em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 55%, transparent);
+		margin-bottom: 22px;
+		display: block;
+	}
+
+	.hero-card .hero-card-figure {
+		line-height: 1;
+		letter-spacing: -.03em;
+		color: #fff;
+		position: relative;
+	}
+
+	.hero-card .hero-card-figure em {
+		font-style: italic;
+		color: var(--hex-color-primary-light);
+	}
+
+	.hero-card p {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 70%, transparent);
+		margin-top: 12px;
+		max-width: 26ch;
+	}
+
+	.hero-card-divider {
+		height: 1px;
+		background: rgba(255, 255, 255, .14);
+		margin: 24px 0 20px;
+	}
+
+	.hero-card-stats {
+		display: flex;
+		gap: 26px;
+	}
+
+	.hero-card-stats b {
+		display: block;
+		line-height: 1.1;
+		color: #fff;
+	}
+
+	.hero-card-stats span {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 55%, transparent);
+	}
+
+	/* Logo strip. */
+	.logo-strip {
+		margin-top: 84px;
+		border-top: 1px solid var(--hex-color-border);
+		border-bottom: 1px solid var(--hex-color-border);
+		padding: 30px 0;
+	}
+
+	.logo-strip .hex-container {
+		display: flex;
+		align-items: center;
+		gap: 38px;
+		flex-wrap: wrap;
+	}
+
+	.logo-strip-label {
+		letter-spacing: .13em;
+		text-transform: uppercase;
+		color: var(--hex-color-muted-text);
+		flex: 0 0 auto;
+		max-width: 170px;
+		line-height: 1.5;
+	}
+
+	.logo-strip-names {
+		display: flex;
+		gap: 34px;
+		flex-wrap: wrap;
+		flex: 1;
+	}
+
+	.logo-strip-names span {
+		font-weight: 600;
+		color: var(--hex-color-muted-text);
+		letter-spacing: -.01em;
+		transition: color 200ms ease;
+	}
+
+	.logo-strip-names span:hover {
+		color: var(--hex-color-body-text);
+	}
+
+	/* Numbered service rows. */
+	.rows {
+		border-top: 1px solid var(--hex-color-border);
+	}
+
+	.row-item {
+		display: grid;
+		grid-template-columns: 70px 1.1fr 1.4fr auto;
+		gap: 32px;
+		align-items: start;
+		padding: 34px 0;
+		border-bottom: 1px solid var(--hex-color-border);
+		transition: background 220ms ease;
+		position: relative;
+	}
+
+	.row-item:hover {
+		background: var(--hex-card-background, #fff);
+	}
+
+	.row-item-num {
+		color: var(--hex-color-accent);
+		padding-top: 6px;
+	}
+
+	.row-item-desc {
+		color: var(--hex-color-secondary);
+		padding-top: 5px;
+	}
+
+	.row-item-desc ul {
+		list-style: none;
+		margin-top: 12px;
+		display: flex;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+
+	.row-item-go {
+		align-self: center;
+		width: 38px;
+		height: 38px;
+		border-radius: 50%;
+		border: 1px solid var(--hex-color-border-strong);
+		display: grid;
+		place-items: center;
+		transition: background 200ms ease, border-color 200ms ease;
+	}
+
+	.row-item-go .icon {
+		color: var(--hex-color-body-text);
+	}
+
+	.row-item:hover .row-item-go {
+		background: var(--hex-color-primary);
+		border-color: var(--hex-color-primary);
+	}
+
+	.row-item:hover .row-item-go .icon {
+		color: #fff;
+	}
+
+	/* Dark band section. */
+	.dark-band {
+		background: var(--hex-color-inverse-background);
+		color: var(--hex-color-inverse-text);
+	}
+
+	.dark-band h2 {
+		color: #fff;
+	}
+
+	.dark-band h4 {
+		color: #fff;
+	}
+
+	.dark-band-cta {
+		margin-top: 32px;
+	}
+
+	.dark-band-grid {
+		display: grid;
+		grid-template-columns: .9fr 1.1fr;
+		gap: 60px;
+		align-items: start;
+	}
+
+	.feature-list {
+		display: grid;
+		border-top: 1px solid rgba(255, 255, 255, .14);
+	}
+
+	.feature-list > div {
+		padding: 22px 0;
+		border-bottom: 1px solid rgba(255, 255, 255, .14);
+		display: grid;
+		grid-template-columns: 26px 1fr;
+		gap: 18px;
+	}
+
+	.feature-list-index {
+		color: var(--hex-color-primary-light);
+		padding-top: 4px;
+	}
+
+	.feature-list p {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 66%, transparent);
+	}
+
+	/* Stats grid. */
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		border-top: 1px solid var(--hex-color-border);
+		border-bottom: 1px solid var(--hex-color-border);
+	}
+
+	.stats-grid > div {
+		padding: 44px 30px 40px;
+		border-right: 1px solid var(--hex-color-border);
+	}
+
+	.stats-grid > div:last-child {
+		border-right: 0;
+	}
+
+	.stats-grid span {
+		color: var(--hex-color-muted-text);
+		display: block;
+		max-width: 22ch;
+	}
+
+	.stats-figure {
+		display: block;
+		line-height: 1;
+		letter-spacing: -.03em;
+		margin-bottom: 12px;
+		color: var(--hex-color-body-text);
+	}
+
+	.stats-figure em {
+		font-style: italic;
+		color: var(--hex-color-accent);
+	}
+
+	/* Brand cards grid — layout only, .card supplies background/border/radius. */
+	.brand-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 22px;
+	}
+
+	.brand-card {
+		padding: 36px 32px;
+		transition: border-color 220ms ease, transform 220ms ease;
+	}
+
+	.brand-card:hover {
+		border-color: var(--hex-color-border-strong);
+		transform: translateY(-3px);
+	}
+
+	.brand-card .tag {
+		letter-spacing: .13em;
+		text-transform: uppercase;
+		color: var(--hex-color-muted-text);
+		display: block;
+		margin-bottom: 16px;
+	}
+
+	.brand-card p {
+		color: var(--hex-color-secondary);
+		margin-bottom: 24px;
+	}
+
+	.brand-card .brand-foot {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding-top: 20px;
+		border-top: 1px solid var(--hex-color-border);
+	}
+
+	.brand-card .brand-foot small {
+		color: var(--hex-color-muted-text);
+	}
+
+	.link-arrow {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-weight: 600;
+		color: var(--hex-color-primary);
+	}
+
+	.link-arrow .icon {
+		color: inherit;
+	}
+
+	.link-arrow:hover .icon {
+		transform: translateX(3px);
+	}
+
+	/* Pull quote. */
+	.quote-block {
+		background: var(--hex-color-muted);
+		border-radius: var(--radius-md);
+		padding: 56px 52px;
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 34px;
+		align-items: start;
+	}
+
+	.quote-mark {
+		line-height: .7;
+		color: var(--hex-color-accent);
+		opacity: .9;
+	}
+
+	.quote-block p {
+		line-height: 1.3;
+		letter-spacing: -.015em;
+		color: var(--hex-color-body-text);
+	}
+
+	.quote-who {
+		margin-top: 22px;
+		color: var(--hex-color-muted-text);
+	}
+
+	/* Compliance box — layout only, .card supplies background/border/radius. */
+	.compliance-box {
+		display: grid;
+		grid-template-columns: 1fr auto;
+		gap: 40px;
+		align-items: center;
+		margin-top: 26px;
+		padding: 34px 36px;
+	}
+
+	.compliance-box p {
+		color: var(--hex-color-secondary);
+		max-width: 62ch;
+	}
+
+	.badge-row {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+	/* Two paths split. */
+	.paths-split {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		border: 1px solid var(--hex-color-border);
+		border-radius: var(--radius-md);
+		overflow: hidden;
+		background: #fff;
+	}
+
+	.path-card {
+		padding: 44px 40px;
+		border-right: 1px solid var(--hex-color-border);
+		transition: background 220ms ease;
+	}
+
+	.path-card:last-child {
+		border-right: 0;
+	}
+
+	.path-card:hover {
+		background: var(--hex-color-muted);
+	}
+
+	.path-card .path-k {
+		letter-spacing: .13em;
+		text-transform: uppercase;
+		color: var(--hex-color-accent);
+		display: block;
+		margin-bottom: 16px;
+	}
+
+	.path-card p {
+		color: var(--hex-color-secondary);
+		margin-bottom: 26px;
+		min-height: 52px;
+	}
+
+	/* Contact form split — layout only, .card supplies the outer box. */
+	.form-split {
+		display: grid;
+		grid-template-columns: .85fr 1.15fr;
+		overflow: hidden;
+		padding: 0;
+	}
+
+	.form-split-side {
+		padding: 48px 42px;
+		background: var(--hex-color-inverse-background);
+		color: var(--hex-color-inverse-text);
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+
+	.form-split-side h2 {
+		color: #fff;
+		margin-bottom: 16px;
+	}
+
+	.form-split-side p {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 72%, transparent);
+	}
+
+	.form-split-side .contact-list {
+		margin-top: 40px;
+		display: grid;
+		gap: 14px;
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 85%, transparent);
+	}
+
+	.form-split-side .contact-list div {
+		display: flex;
+		gap: 12px;
+		align-items: center;
+	}
+
+	.form-split-side .contact-list .icon {
+		color: var(--hex-color-primary-light);
+	}
+
+	.form-split form {
+		padding: 48px 42px;
+		display: grid;
+		gap: 18px;
+	}
+
+	.form-split .form-label {
+		font-weight: 600;
+		margin-bottom: 7px;
+	}
+
+	.form-split select {
+		appearance: none;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4.5L6 8.5L10 4.5' stroke='%23807F74' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 14px center;
+		background-size: 12px;
+	}
+
+	.form-row-split {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 18px;
+	}
+
+	.fine-print {
+		color: var(--hex-color-muted-text);
+	}
+
+	label i {
+		color: var(--hex-color-accent);
+		font-style: normal;
+	}
+
+	/* Footer grid. */
+	footer {
+		background: var(--hex-color-inverse-background);
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 75%, transparent);
+		padding: 72px 0 32px;
+	}
+
+	footer a {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 78%, transparent);
+	}
+
+	footer a:hover {
+		color: var(--hex-color-primary-light);
+	}
+
+	footer h5 {
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 45%, transparent);
+		margin-bottom: 18px;
+		text-transform: uppercase;
+	}
+
+	footer ul {
+		list-style: none;
+		display: grid;
+		gap: 11px;
+	}
+
+	.footer-grid {
+		display: grid;
+		grid-template-columns: 1.6fr 1fr 1fr 1fr;
+		gap: 44px;
+	}
+
+	.footer-blurb {
+		max-width: 36ch;
+	}
+
+	.footer-subheading {
+		margin-top: 26px;
+	}
+
+	.footer-bottom {
+		margin-top: 56px;
+		padding-top: 26px;
+		border-top: 1px solid rgba(255, 255, 255, .14);
+		display: flex;
+		justify-content: space-between;
+		gap: 20px;
+		flex-wrap: wrap;
+		color: color-mix(in srgb, var(--hex-color-inverse-text) 50%, transparent);
+	}
+
+	/*
+	 * Responsive breakpoints for the Meridian layout. Font-size is
+	 * never touched here — every text element already carries one of
+	 * the 11 fluid .hex-* classes, which scale continuously on their
+	 * own; a breakpoint only ever needs to change layout (grid
+	 * columns, gaps, padding, show/hide), never re-declare a size.
+	 */
+	@media (max-width: 1000px) {
+		.hero-inner,
+		.dark-band-grid,
+		.form-split,
+		.compliance-box {
+			grid-template-columns: 1fr;
+			gap: 40px;
+		}
+
+		.brand-grid,
+		.paths-split {
+			grid-template-columns: 1fr;
+		}
+
+		.path-card {
+			border-right: 0;
+			border-bottom: 1px solid var(--hex-color-border);
+		}
+
+		.stats-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.stats-grid > div:nth-child(2) {
+			border-right: 0;
+		}
+
+		.row-item {
+			grid-template-columns: 44px 1fr;
+			gap: 8px 18px;
+			padding: 28px 0;
+		}
+
+		.row-item-go {
+			display: none;
+		}
+
+		.row-item-desc {
+			grid-column: 2;
+			padding-top: 0;
+		}
+
+		.footer-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.site-nav .nav-menu {
+			display: none;
+		}
+
+		section {
+			padding: 76px 0;
+		}
+
+		.form-split-side,
+		.form-split form {
+			padding: 34px 26px;
+		}
+
+		.quote-block {
+			padding: 36px 28px;
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 760px) {
+		.logo-strip .hex-container {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 18px;
+		}
+
+		.logo-strip-names {
+			gap: 8px 20px;
+			width: 100%;
+		}
+
+		.site-nav {
+			gap: 14px;
+			height: 64px;
+		}
+
+		.site-tel,
+		.lbl-long {
+			display: none;
+		}
+
+		.lbl-short {
+			display: inline;
+		}
+
+		.site-nav .btn {
+			padding: 9px 16px;
+		}
+	}
+
+	@media (max-width: 560px) {
+		.hex-container {
+			padding-inline: 20px;
+		}
+
+		.stats-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.stats-grid > div {
+			border-right: 0;
+			border-bottom: 1px solid var(--hex-color-border);
+		}
+
+		.footer-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.hero {
+			padding-top: 56px;
+		}
+
+		.hero-cta .btn {
+			flex: 1 1 100%;
+			justify-content: center;
+		}
 	}
 }

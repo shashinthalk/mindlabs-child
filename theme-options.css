@@ -8,105 +8,129 @@
  * an editable field under "Custom Tokens". Reference a token from
  * your own CSS as var(--hex-your-key, fallback).
  *
+ * Grouped into commented sections below (Typography, Spacing, ...) —
+ * hand-edits keep whatever section you put them in; a section with
+ * zero declarations is simply omitted, and reappears once it has one.
+ *
  * See knoladge/child-theme-css-token-architecture.md.
  */
 :root {
-	--hex-h1-size-mobile: 28px;
-	--hex-h1-size-desktop: 40px;
-	--hex-h1-line-height: 1.2;
-	--hex-h1-letter-spacing: -0.8px;
-	--hex-h1-weight: 700;
-	--hex-h1-margin-bottom: 24px;
-	--hex-h2-size-mobile: 24px;
-	--hex-h2-size-desktop: 85px;
-	--hex-h2-line-height: 1.25;
-	--hex-h2-letter-spacing: -0.85px;
-	--hex-h2-weight: 700;
-	--hex-h2-margin-bottom: 20px;
-	--hex-h3-size-mobile: 22px;
-	--hex-h3-size-desktop: 28px;
-	--hex-h3-line-height: 1.3;
-	--hex-h3-letter-spacing: -0.28px;
-	--hex-h3-weight: 600;
-	--hex-h3-margin-bottom: 16px;
-	--hex-h4-size-mobile: 20px;
-	--hex-h4-size-desktop: 24px;
+	/* Typography. */
+	--hex-h1-size-mobile: 46px;
+	--hex-h1-size-desktop: 86px;
+	--hex-h1-line-height: 1.02;
+	--hex-h1-letter-spacing: -2.15px;
+	--hex-h1-weight: 400;
+	--hex-h1-margin-bottom: 0px;
+	--hex-h2-size-mobile: 34px;
+	--hex-h2-size-desktop: 56px;
+	--hex-h2-line-height: 1.02;
+	--hex-h2-letter-spacing: -1.4px;
+	--hex-h2-weight: 400;
+	--hex-h2-margin-bottom: 0px;
+	--hex-h3-size-mobile: 25px;
+	--hex-h3-size-desktop: 30px;
+	--hex-h3-line-height: 1.02;
+	--hex-h3-letter-spacing: -0.75px;
+	--hex-h3-weight: 400;
+	--hex-h3-margin-bottom: 0px;
+	--hex-h4-size-mobile: 16.5px;
+	--hex-h4-size-desktop: 16.5px;
 	--hex-h4-line-height: 1.35;
-	--hex-h4-letter-spacing: 0px;
+	--hex-h4-letter-spacing: -0.165px;
 	--hex-h4-weight: 600;
-	--hex-h4-margin-bottom: 16px;
-	--hex-h5-size-mobile: 18px;
-	--hex-h5-size-desktop: 20px;
+	--hex-h4-margin-bottom: 5px;
+	--hex-h5-size-mobile: 11px;
+	--hex-h5-size-desktop: 11px;
 	--hex-h5-line-height: 1.4;
-	--hex-h5-letter-spacing: 0px;
-	--hex-h5-weight: 600;
-	--hex-h5-margin-bottom: 12px;
+	--hex-h5-letter-spacing: 1.43px;
+	--hex-h5-weight: 300;
+	--hex-h5-margin-bottom: 18px;
 	--hex-h6-size-mobile: 15px;
 	--hex-h6-size-desktop: 16px;
 	--hex-h6-line-height: 1.4;
 	--hex-h6-letter-spacing: 0.32px;
 	--hex-h6-weight: 600;
 	--hex-h6-margin-bottom: 12px;
-	--hex-body-size-mobile: 15px;
+	--hex-body-size-mobile: 16px;
 	--hex-body-size-desktop: 16px;
-	--hex-body-line-height: 1.6;
-	--hex-lead-size-mobile: 18px;
-	--hex-lead-size-desktop: 20px;
-	--hex-lead-line-height: 1.6;
+	--hex-body-line-height: 1.62;
+	--hex-lead-size-mobile: 16px;
+	--hex-lead-size-desktop: 17.5px;
+	--hex-lead-line-height: 1.68;
 	--hex-large-size-mobile: 16px;
 	--hex-large-size-desktop: 18px;
 	--hex-large-line-height: 1.6;
-	--hex-small-size-mobile: 13px;
-	--hex-small-size-desktop: 14px;
+	--hex-small-size-mobile: 13.5px;
+	--hex-small-size-desktop: 14.5px;
 	--hex-small-line-height: 1.5;
 	--hex-meta-size-mobile: 12px;
-	--hex-meta-size-desktop: 13px;
+	--hex-meta-size-desktop: 12.5px;
 	--hex-meta-line-height: 1.4;
 	--hex-meta-letter-spacing: 0.39px;
 	--hex-meta-weight: 600;
-	--hex-body-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-	--hex-heading-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-	--hex-link-color: #000000;
-	--hex-link-hover-color: #000000;
+	--hex-link-color: #D8471B;
+	--hex-link-hover-color: #B23A15;
+	--hex-font-heading: 'Instrument Serif', serif;
+	--hex-font-body: 'Inter', sans-serif;
+	--hex-font-accent: 'Instrument Serif', serif;
+	--hex-font-mono: 'IBM Plex Mono', monospace;
+	--hex-h1-size: 86px;
+	--hex-h2-size: 56px;
+	--hex-h3-size: 30px;
+	--hex-h4-size: 16.5px;
+	--hex-h5-size: 11px;
+	--hex-h6-size: 16px;
+	--hex-body-size: 16px;
+	--hex-lead-size: 17.5px;
+	--hex-large-size: 18px;
+	--hex-small-size: 14.5px;
+	--hex-meta-size: 12.5px;
+
+	/* Spacing. */
 	--hex-spacing-xs: 8px;
 	--hex-spacing-sm: 16px;
 	--hex-spacing-md: 24px;
 	--hex-spacing-lg: 32px;
 	--hex-spacing-xl: 48px;
 	--hex-spacing-2xl: 64px;
-	--hex-color-primary: #2563eb;
-	--hex-color-secondary: #475569;
+
+	/* Colors. */
+	--hex-color-primary: #D8471B;
+	--hex-color-secondary: #4B4E45;
 	--hex-color-tertiary: #7c3aed;
-	--hex-color-accent: #16a34a;
+	--hex-color-accent: #D8471B;
 	--hex-color-success: #16a34a;
 	--hex-color-warning: #d97706;
 	--hex-color-danger: #dc2626;
 	--hex-color-info: #0ea5e9;
-	--hex-color-muted: #f1f5f9;
+	--hex-color-muted: #F2F0EA;
 	--hex-color-emphasis: #111827;
-	--hex-color-body-background: #ffffff;
-	--hex-color-body-text: #1f2937;
-	--hex-color-inverse-background: #111827;
-	--hex-color-inverse-text: #f9fafb;
-	--hex-color-border: #e5e7eb;
+	--hex-color-body-background: #FBFAF7;
+	--hex-color-body-text: #14150F;
+	--hex-color-inverse-background: #16261F;
+	--hex-color-inverse-text: #EFEDE4;
+	--hex-color-border: #E2DFD6;
+
+	/* Buttons. */
 	--hex-button-default-background: #e5e7eb;
 	--hex-button-default-color: #111827;
 	--hex-button-default-hover-background: #d1d5db;
 	--hex-button-default-hover-color: #111827;
-	--hex-button-primary-background: #2563eb;
+	--hex-button-primary-background: #D8471B;
 	--hex-button-primary-color: #ffffff;
-	--hex-button-primary-hover-background: #1d4ed8;
+	--hex-button-primary-hover-background: #B23A15;
 	--hex-button-primary-hover-color: #ffffff;
-	--hex-button-secondary-background: #475569;
-	--hex-button-secondary-color: #ffffff;
-	--hex-button-secondary-hover-background: #334155;
-	--hex-button-secondary-hover-color: #ffffff;
+	--hex-button-secondary-background: #14150F;
+	--hex-button-secondary-color: #FBFAF7;
+	--hex-button-secondary-hover-background: #D8471B;
+	--hex-button-secondary-hover-color: #FBFAF7;
 	--hex-button-danger-background: #dc2626;
 	--hex-button-danger-color: #ffffff;
 	--hex-button-danger-hover-background: #b91c1c;
 	--hex-button-danger-hover-color: #ffffff;
-	--hex-button-text-color: #2563eb;
-	--hex-button-text-hover-color: #1d4ed8;
+	--hex-button-text-color: #D8471B;
+	--hex-button-text-hover-color: #B23A15;
 	--hex-button-radius: 6px;
 	--hex-button-font-weight: 600;
 	--hex-button-padding-x-xs: 8px;
@@ -114,48 +138,60 @@
 	--hex-button-padding-x-sm: 12px;
 	--hex-button-padding-y-sm: 6px;
 	--hex-button-padding-x: 20px;
-	--hex-button-padding-y: 10px;
-	--hex-button-padding-x-lg: 28px;
+	--hex-button-padding-y: 11px;
+	--hex-button-padding-x-lg: 26px;
 	--hex-button-padding-y-lg: 14px;
 	--hex-button-padding-x-xl: 36px;
 	--hex-button-padding-y-xl: 18px;
-	--hex-form-background: #ffffff;
-	--hex-form-border-color: #d1d5db;
-	--hex-form-focus-border-color: #2563eb;
+
+	/* Forms. */
+	--hex-form-background: #FBFAF7;
+	--hex-form-border-color: #CFCBBF;
+	--hex-form-focus-border-color: #D8471B;
 	--hex-form-placeholder-color: #9ca3af;
-	--hex-form-label-color: #374151;
+	--hex-form-label-color: #4B4E45;
 	--hex-form-radius: 6px;
 	--hex-form-padding-x-sm: 8px;
 	--hex-form-padding-y-sm: 4px;
-	--hex-form-padding-x: 12px;
-	--hex-form-padding-y: 8px;
+	--hex-form-padding-x: 14px;
+	--hex-form-padding-y: 12px;
 	--hex-form-padding-x-lg: 16px;
 	--hex-form-padding-y-lg: 12px;
+
+	/* Cards. */
 	--hex-card-background: #ffffff;
-	--hex-card-border-color: #e5e7eb;
-	--hex-card-radius: 8px;
+	--hex-card-border-color: #E2DFD6;
+	--hex-card-radius: 10px;
 	--hex-card-padding: 24px;
 	--hex-card-shadow: none;
 	--hex-card-shadow-hover: none;
-	--hex-section-background-default: #ffffff;
-	--hex-section-background-muted: #f8fafc;
+
+	/* Sections. */
+	--hex-section-background-default: #FBFAF7;
+	--hex-section-background-muted: #EDE7DA;
 	--hex-section-background-primary: #2563eb;
 	--hex-section-background-secondary: #475569;
 	--hex-section-padding-sm: 32px;
 	--hex-section-padding-md: 48px;
 	--hex-section-padding-lg: 64px;
-	--hex-section-padding-xl: 96px;
+	--hex-section-padding-xl: 104px;
+
+	/* Global. */
 	--hex-radius-sm: 4px;
-	--hex-radius-md: 8px;
+	--hex-radius-md: 10px;
 	--hex-radius-lg: 16px;
 	--hex-fluid-breakpoint-s: 640px;
 	--hex-fluid-breakpoint-m: 960px;
 	--hex-fluid-breakpoint-l: 1200px;
 	--hex-fluid-breakpoint-xl: 1600px;
+
+	/* Tables. */
 	--hex-table-border-color: #e5e7eb;
 	--hex-table-stripe-background: #f9fafb;
 	--hex-table-header-background: #f3f4f6;
 	--hex-table-header-color: #111827;
+
+	/* Alerts. */
 	--hex-alert-primary-background: #eff6ff;
 	--hex-alert-primary-color: #1e3a8a;
 	--hex-alert-success-background: #f0fdf4;
@@ -164,6 +200,8 @@
 	--hex-alert-warning-color: #92400e;
 	--hex-alert-danger-background: #fef2f2;
 	--hex-alert-danger-color: #991b1b;
+
+	/* Badges. */
 	--hex-badge-default-background: #f3f4f6;
 	--hex-badge-default-color: #111827;
 	--hex-badge-primary-background: #dbeafe;
@@ -174,28 +212,42 @@
 	--hex-badge-warning-color: #92400e;
 	--hex-badge-danger-background: #fee2e2;
 	--hex-badge-danger-color: #991b1b;
-	--hex-nav-link-color: #374151;
-	--hex-nav-link-hover-color: #2563eb;
-	--hex-nav-link-active-color: #2563eb;
+
+	/* Navigation. */
+	--hex-nav-link-color: #4B4E45;
+	--hex-nav-link-hover-color: #D8471B;
+	--hex-nav-link-active-color: #D8471B;
 	--hex-nav-font-weight: 500;
-	--hex-nav-gap: 24px;
-	--hex-icon-color: #475569;
-	--hex-icon-hover-color: #2563eb;
-	--hex-icon-size-sm: 16px;
+	--hex-nav-gap: 28px;
+
+	/* Accordion. */
+	--hex-accordion-background: #ffffff;
+	--hex-accordion-border-color: #e5e7eb;
+	--hex-accordion-header-background: #f9fafb;
+	--hex-accordion-header-color: #111827;
+	--hex-accordion-header-hover-background: #f3f4f6;
+	--hex-accordion-radius: 8px;
+	--hex-accordion-padding: 16px;
+	--hex-accordion-gap: 8px;
+
+	/* Tabs. */
+	--hex-tabs-border-color: #e5e7eb;
+	--hex-tabs-label-color: #6b7280;
+	--hex-tabs-active-label-color: #2563eb;
+	--hex-tabs-active-border-color: #2563eb;
+	--hex-tabs-gap: 24px;
+	--hex-tabs-padding: 16px;
+
+	/* Icons. */
+	--hex-icon-color: #14150F;
+	--hex-icon-hover-color: #D8471B;
+	--hex-icon-size-sm: 15px;
 	--hex-icon-size-md: 24px;
 	--hex-icon-size-lg: 32px;
-	--hex-fluid-mobile-breakpoint: 640px;
-	--hex-fluid-desktop-breakpoint: 1600px;
+
+	/* Custom Tokens. */
+	--hex-color-muted-text: #807F74;
+	--hex-color-border-strong: #CFCBBF;
+	--hex-color-primary-light: #FF8A5E;
 	--hex-ns-size: 32px;
-	--hex-h1-size: 40px;
-	--hex-h2-size: 85px;
-	--hex-h3-size: 28px;
-	--hex-h4-size: 24px;
-	--hex-h5-size: 20px;
-	--hex-h6-size: 16px;
-	--hex-body-size: 16px;
-	--hex-lead-size: 20px;
-	--hex-large-size: 18px;
-	--hex-small-size: 14px;
-	--hex-meta-size: 13px;
 }

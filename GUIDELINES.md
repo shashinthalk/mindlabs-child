@@ -178,3 +178,349 @@ theme now depends on), that's a change for a session explicitly
 scoped to the parent theme — not something to patch from inside this
 child theme's directory, and not something to assume is safe to guess
 at without reading the parent's own current source.
+
+## 8. Page Content JSON framework — how to author a page template's text
+
+The parent theme ships a framework (`inc/page-content.php`) for
+keeping a page template's text content out of hardcoded PHP/HTML and
+in one editable JSON object per page instead — this is what makes a
+non-developer able to change a page's copy without touching a
+template file. **This is the required convention whenever you convert
+a static HTML mockup into a page template in this child theme, or
+write a new one from scratch.**
+
+### What it is, in one sentence
+
+Every page (a `page` post) can have exactly one JSON object of its
+own, stored in a dedicated database table (`{$wpdb->prefix}hex_page_content`
+— not post meta, not a file), editable as raw JSON in a "Page Content
+(JSON)" meta box on that page's own Edit Page screen in wp-admin, read
+by the template via one function call.
+
+### How to use it when building a template
+
+1. **Identify every piece of text your template needs** — headings,
+   body copy, button/link labels, image alt text, anything an
+   editor might reasonably want to change without touching code.
+2. **Pick a flat, descriptive JSON key per piece of text** — e.g.
+   `hero_heading`, `hero_subtext`, `cta_label`, `cta_url`. Group
+   related fields under a nested object if the template has repeated
+   sections (`"rows": [{"heading": "...", "body": "..."}, ...]`) —
+   the framework stores and returns whatever shape you decode/encode;
+   it has no fixed schema of its own.
+3. **In the template PHP**, call `hex_get_page_content()` once near
+   the top (defaults to the current page in the loop; pass a page ID
+   explicitly if needed) and read each key with a sensible fallback,
+   e.g.:
+   ```php
+   $content = hex_get_page_content();
+   ?>
+   <h1><?php echo esc_html( $content['hero_heading'] ?? 'Default Heading' ); ?></h1>
+   ```
+   **Always escape on output** (`esc_html()`/`esc_url()`/`wp_kses_post()`
+   as appropriate for the field) — the framework sanitizes what it
+   stores (`wp_kses_post()` per string leaf, so safe HTML like
+   `<strong>`/`<a>` survives but `<script>`/`onclick` don't), but a
+   template should never skip its own output escaping just because
+   the source already went through one sanitization pass.
+   **Always provide a fallback** (`?? '...'`) — a brand-new page using
+   your template has no saved JSON yet (`hex_get_page_content()`
+   returns `array()`), so the template must still render sensibly
+   with nothing configured.
+4. **Once the page is created and assigned this template**, open it
+   in wp-admin — the "Page Content (JSON)" meta box on the Edit Page
+   screen shows `{}` (or whatever's already saved) as a raw JSON
+   textarea. Type/paste a JSON object using the exact keys your
+   template reads, Save/Update the page, and the template picks it up
+   immediately — no rebuild, no file edit.
+
+### Things to know
+
+- **It must be valid JSON to save.** An invalid submission is
+  rejected outright with an admin notice; the page's previously saved
+  content is left untouched, never silently corrupted.
+- **Every page gets its own content** — two pages using the same
+  template have completely independent JSON, keyed by page ID. There
+  is no template-level default JSON shipped anywhere; a fallback in
+  your template's own PHP (`?? '...'`) is the only default.
+- **Both templates in this child theme use it as of 2026-08-29.**
+  `template-home.php` (renamed from `template-meridian-home.php` the
+  same day) reads its `site`/`hero`/`logo_strip`/`services`/`platform`/
+  `results`/`brands`/`quote`/`compliance`/`paths`/`contact` content
+  this way (its `nav`/`footer` keys were later removed 2026-08-30 when
+  the header/footer moved to §9's site-wide framework instead), and
+  `template-ai-technology.php` reads its `hero`/`features`/`compliance`
+  content the same way. See TEMPLATE-CONVERSION-GUIDE.md's inventory
+  table for the current per-template key shape and DB-backfill status
+  of each.
+- **Functions available**: `hex_get_page_content( $page_id = null )`
+  (read, decoded array) is the only one a template should normally
+  call. `hex_save_page_content()`/`hex_delete_page_content()` exist
+  for programmatic use (e.g. a future import/seed script) but the
+  wp-admin meta box is the normal way content gets written.
+- See the parent's `inc/page-content.php` (full docblocks on every
+  function) and `knoladge/page-content-json-framework.md` for the
+  complete architecture and why each design decision was made (custom
+  table vs. post meta, raw JSON vs. a generated form, etc.).
+
+## 9. Site Content JSON framework — this child theme's own header/footer
+
+Added 2026-08-30. The parent theme also ships a sibling framework,
+`hex_get_site_content( $section )` (`inc/site-content.php` in the
+parent), for **site-wide** chrome that isn't tied to one page — the
+header and the footer. Same idea as §8's Page Content framework (raw
+JSON, editable in wp-admin, read via one function call, no fixed
+schema of its own), but storage is keyed by a fixed `section`
+(`header`/`footer`) instead of a page ID, and it's edited on its own
+"Header & Footer" admin page (`hex-theme-header-footer`) rather than a
+per-page meta box.
+
+**This child theme now has its own branded header/footer**, overriding
+the parent's neutral ones:
+
+- `header.php` / `footer.php` (this theme's root) — override points
+  WordPress's `get_header()`/`get_footer()` resolve to first. They
+  open/close the document and delegate the actual markup to
+  `template-parts/site-header.php` / `template-parts/site-footer.php`
+  (this theme's own — same delegation pattern the parent theme uses
+  for its own header.php/footer.php).
+- Those two template-parts read `hex_get_site_content( 'header' )` /
+  `hex_get_site_content( 'footer' )` for their text — brand name,
+  phone, CTA label/URL (header); blurb, phone, email, ABN, address,
+  footer link columns, bottom-bar legal links (footer) — each with a
+  `?? 'fallback'` matching `template-home.php`'s own original
+  hardcoded copy exactly, so nothing visually changes until an editor
+  saves JSON on the "Header & Footer" admin page.
+- The header's primary nav is a real WP nav menu (`theme_location =>
+  'primary'`), not a hardcoded link array — `.nav-link` is applied to
+  every menu `<a>` automatically by a filter the **parent** theme
+  registers (`hex_nav_menu_link_attributes()`, always active regardless
+  of which theme is the current one).
+- Because this header/footer are now global (every page, not just
+  `template-home.php`/`template-ai-technology.php`), `functions.php`'s
+  `hexnity_wp_child_enqueue_meridian_assets()` was broadened from
+  `is_page_template()`-conditional to unconditional — its
+  `site-theme.css` (the `.site-nav`/`.footer-grid`/`.font-mono`/etc.
+  classes this header/footer use) and IBM Plex Mono font now load on
+  every page, not just those two templates. `template-ai-technology.php`
+  — which already called `get_header()`/`get_footer()` expecting the
+  parent's plain fallback — now gets this branded header/footer
+  instead; that page's own `.page-hero`/`.breadcrumb` title band inside
+  its `<main>` content is unaffected (unrelated markup, unchanged).
+- `template-home.php` now also calls `get_header()`/`get_footer()`
+  (updated 2026-08-30, split out of that template the same way as
+  `template-ai-technology.php` — it originally kept its own inline
+  header/footer markup standalone, deliberately, but that duplicated
+  what these new global files already render). Its own `$nav_links`/
+  `$footer_columns`/`$footer_bottom_links` Page Content fallback
+  arrays were removed since the header/footer no longer read from that
+  page's own JSON; `$content['site']['phone']`/`['email']` are still
+  read from the page's own JSON for the Contact section, which is
+  unrelated to the header/footer.
+- See the parent's `features/header-footer-content.md` and
+  `inc/site-content.php` for the full framework architecture.
+- **DB backfill status (per TEMPLATE-CONVERSION-GUIDE.md §9's same
+  invariant, applied here to site-wide chrome rather than one page):**
+  both `header` and `footer` Site Content JSON rows were saved
+  2026-08-30 (matching the fallback defaults above exactly — nothing
+  visually changed). The "primary" WP nav menu was also backfilled the
+  same day with the 5 original in-page anchor links (Services/AI &
+  Technology/Our Brands/Results/Contact) — it had previously held only
+  a single placeholder "Home" item. **Updated again the same day**,
+  once dedicated pages existed for all 5 (`template-services.php`/
+  `template-our-brands.php`/`template-results.php`/`template-contact.php`,
+  plus the earlier `template-ai-technology.php`): both the nav menu and
+  the relevant footer column links were repointed from `#anchor`
+  fragments to the real pages — see the table below and
+  `TEMPLATE-CONVERSION-GUIDE.md`'s inventory for what each page
+  contains. Check both (Site Content rows non-empty, "primary" menu
+  populated, and — now — pointing at real pages rather than anchors)
+  any time this header/footer is touched again, the same
+  standing-invariant discipline as page-level JSON.
+
+### How to edit this theme's header/footer content
+
+1. In wp-admin, go to **Hexnity WP → Header & Footer**.
+2. The "Header" and "Footer" panels are raw JSON `<textarea>`s. This
+   child theme's own `template-parts/site-header.php` and
+   `site-footer.php` read the keys below — the parent theme's admin
+   page description text shows its own *default* keys (which this
+   child theme overrides, since it ships its own copies of these
+   files), so use the JSON shown here instead, not what the admin page
+   text says.
+3. Save. Each section validates/saves independently — invalid JSON in
+   one section leaves that section's previous content untouched and
+   still saves the other.
+
+**Header section** — every key is optional, each falls back to
+`template-home.php`'s own original copy if omitted:
+
+```json
+{
+  "brand_name": "Mindlabz",
+  "phone": "1300 110 829",
+  "cta_label": "Book a consultation",
+  "cta_label_short": "Enquire",
+  "cta_url": "#contact",
+  "skip_link_text": "Skip to content"
+}
+```
+
+`brand_name` also falls back to the site's own Settings → General
+"Site Title" if omitted (then to "Mindlabz" if that's empty too).
+`cta_label_short` is what shows on narrow screens (≤760px, where
+`cta_label` and the phone number are hidden — see `site-theme.css`'s
+`.lbl-long`/`.lbl-short`/`.site-tel` responsive rules). Primary nav
+links are **not** set here — they're a real WP menu, edited at
+**Appearance → Menus** under the "Primary" location, same as any other
+WordPress nav menu. That menu (`main-menu`) currently holds these 5
+links, last updated 2026-08-30 to point at each section's own dedicated
+page (originally seeded the same day pointing at `#anchor` fragments on
+Home, before those pages existed):
+
+| Label | URL | Page |
+|---|---|---|
+| Services | `home_url( '/services/' )` | `template-services.php` |
+| AI & Technology | `home_url( '/ai-technology/' )` | `template-ai-technology.php` |
+| Our Brands | `home_url( '/our-brands/' )` | `template-our-brands.php` |
+| Results | `home_url( '/results/' )` | `template-results.php` |
+| Contact | `home_url( '/contact/' )` | `template-contact.php` |
+
+Home's own `#services`/`#platform`/`#brands`/`#results`/`#contact`
+sections still exist and still work as in-page anchors — they were
+never removed from `template-home.php` — the nav simply no longer
+targets them; a visitor lands on the dedicated page instead of
+scrolling Home. Edit this list at **Appearance → Menus** like any other
+WordPress menu, not in code.
+
+**Footer section** — every key is optional, same fallback rule:
+
+```json
+{
+  "brand_name": "Mindlabz",
+  "blurb": "Sales technology and managed acquisition for Australian energy, telecom, insurance and finance brands.",
+  "phone": "1300 110 829",
+  "email": "info@mindlabz.com.au",
+  "abn": "ABN 00 000 000 000",
+  "address": "10.1, 3 Bowen Crescent, Melbourne VIC 3004",
+  "columns": [
+    {
+      "heading": "Company",
+      "links": [
+        { "label": "About us", "url": "/about" },
+        { "label": "Contact", "url": "/contact" }
+      ]
+    },
+    {
+      "heading": "Services",
+      "links": [
+        { "label": "AI & IT Solutions", "url": "/services/ai" }
+      ]
+    }
+  ],
+  "bottom_links": [
+    { "label": "Privacy Policy", "url": "/privacy" },
+    { "label": "Terms & Conditions", "url": "/terms" }
+  ]
+}
+```
+
+`columns` is a list of footer link groups, rendered left-to-right
+after the brand/blurb block — the **third** column (index `2`, i.e.
+the third item in the list) additionally gets a "Contact" sub-heading
+with the phone/email as links, matching `template-home.php`'s "Our
+brands" column position; keep a third column in the list if you want
+that contact block to appear. `bottom_links` is the small legal-link
+row (Terms, Privacy, etc.) in the footer's bottom bar. Omit `columns`/
+`bottom_links` entirely to fall back to the same 3-column structure
+shown above (Company / Services / Our brands).
+
+**Current live values (last updated 2026-08-30)** — the fallback
+structure originally shipped with every link as a `#` placeholder;
+these were replaced with real URLs once the matching pages existed:
+
+| Column | Label | URL |
+|---|---|---|
+| Company | About us, Careers, Compliance | `#` (still no matching page) |
+| Company | Contact | `home_url( '/contact/' )` |
+| Services | AI & IT Solutions | `home_url( '/ai-technology/' )` |
+| Services | Energy broking, Broadband & mobile, Private health cover | `home_url( '/services/' )` (no dedicated page each — all 3 point at the shared Services overview) |
+| Our brands | Compare Your Bills, Check Your Bill | `home_url( '/our-brands/' )` (no real external brand-site URLs are on file — this points at the internal page describing them instead) |
+| — | `bottom_links` (Terms & Conditions, Privacy Policy, Complaints) | still `#` (no matching pages) |
+
+If a page is later created for any `#` item above (an About page, a
+Careers page, individual Energy/Broadband/Health pages, or the real
+external `compareyourbills.com.au`/`checkyourbill.com.au` URLs become
+known), update that link the same way — edit the JSON on this admin
+page, or via `hex_save_site_content( 'footer', $payload )`.
+
+## 10. Contact Form 7 — how the live Contact form is built and styled
+
+Added 2026-08-30. The Contact page (`template-contact.php`) originally
+had a static, non-functional `<form>` (no submit handler, nothing sent
+anywhere) matching `template-home.php`'s own copy of the same form.
+That was replaced with a real, working form using the **Contact Form 7**
+plugin (already active — `contact-form-7/wp-contact-form-7.php`), the
+plugin's own default form (ID 41, "Contact form"), rebuilt with a
+custom form-tag template.
+
+**Styling — the same "reuse real classes" rule as everywhere else
+(TEMPLATE-CONVERSION-GUIDE.md rule 5), applied to a third-party
+plugin's form-tags**: every CF7 field tag carries `class:` options
+directly, e.g. `[text* first-name class:form-control class:hex-small
+placeholder "Jane"]` — CF7 supports repeating the `class:` option
+per-tag, each occurrence appends one more class to that field's
+rendered `class` attribute. This puts the theme's own `.form-control`/
+`.form-label`/`.btn`/`.btn-primary`/`.btn-lg`/`.btn-submit` directly on
+CF7's real output, the same components step 5 of the conversion guide
+uses everywhere else — **never** write parallel CSS rules targeting
+CF7's own default classes (`.wpcf7-form-control` etc.) as a lookalike;
+that would violate the same rule this pattern is following.
+
+**The `wpautop()` problem**: CF7 runs its form-tag template through
+WordPress's `wpautop()` by default, which — for a template shaped like
+this one, with a `<label>` and its form-tag on separate lines inside a
+plain `<div>` — inserts unrequested `<p>`/`<br>` tags that break the
+exact markup `.form-split`/`.form-row-split` (`site-theme.css`) expect.
+Fixed via `add_filter( 'wpcf7_autop_or_not', '__return_false' )`-style
+function in `functions.php` (`hexnity_wp_child_cf7_disable_autop()`),
+applied sitewide — safe, since this theme has only the one CF7 form and
+every spacing rule it relies on comes from `site-theme.css`'s own
+`gap`/`padding`, not from wpautop's inserted whitespace. **Any new CF7
+form added to this theme inherits this sitewide filter automatically**
+— if a future form's own copy actually wants wpautop's paragraph
+behavior, scope the filter to specific form IDs (`$wpcf7->id()`
+inside the callback) instead of removing it.
+
+**Embedding**: `template-contact.php` calls
+`do_shortcode( '[contact-form-7 id="' . absint( $cf7_form_id ) . '" title="Contact form"]' )`,
+guarded by `class_exists( 'WPCF7_ContactForm' )` (falls back to a
+plain `mailto:` link if the plugin is ever deactivated). The form ID
+is read from that page's own `hex_get_page_content()`
+(`contact.cf7_form_id`), falling back to `41` — lets an editor point
+the page at a different CF7 form without a code change. CF7 wraps its
+own `<form>` in an outer `<div class="wpcf7">` — this does **not**
+break `.form-split`'s 2-column CSS Grid (`.form-split { display:
+grid; grid-template-columns: .85fr 1.15fr; }`): the `<div class="wpcf7">`
+becomes the grid's second direct-child item and stretches to fill it
+by CSS Grid's own default (`align-items`/`justify-items: stretch`),
+while `.form-split form` (a descendant selector, not a direct-child
+one) still matches the real `<form>` nested one level deeper and
+applies its `padding`/`display:grid` correctly.
+
+**Mail settings**: recipient `info@mindlabz.com.au` (the same address
+used everywhere else on the site — `theme-options.css`/Site Content/
+Page Content all agree on it); sender uses the site's own domain
+(`wordpress@` + the site's host) with `Reply-To:` set to the visitor's
+own submitted email, the standard CF7-recommended pattern for avoiding
+spam-filter rejection on the From: header. The success message was
+customized to match the site's own contact copy ("Thanks — we'll be in
+touch within one business day.").
+
+If a future page needs its own CF7 form (not this same one), follow
+the same three-part pattern: (1) build the form-tag template with
+`class:` options matching real theme classes, never CF7's defaults
+styled separately; (2) confirm `wpautop()` won't fight your markup
+shape (it's already off sitewide here); (3) embed via `do_shortcode()`
+guarded by `class_exists( 'WPCF7_ContactForm' )`, with the form ID
+read from that page's own Page Content JSON.

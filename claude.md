@@ -15,6 +15,16 @@ directory, before touching anything else.
    respect it. This file (`claude.md`) governs how you work here in
    general; `GUIDELINES.md` governs what would break parent
    compatibility specifically. Read both, every session.
+1a. **If the task involves converting an HTML/CSS concept file into a
+   WordPress page template (or touches an existing converted
+   template's tokens/classes), also read
+   `TEMPLATE-CONVERSION-GUIDE.md` next, before starting.** It's the
+   step-by-step correct process for that specific workflow — how
+   values get mapped onto `theme-options.css`, why font-sizes must
+   always use one of the 11 existing `.hex-*` fluid classes and never
+   a hardcoded value or a hand-written `clamp()`, and how new shared
+   classes get authored in `site-theme.css`. Not needed for unrelated
+   child-theme work (e.g. a pure `functions.php` tweak).
 2. **Check whether `project.json` and `action-map.json` already exist
    in this directory.**
    - **If they don't exist yet**: create them now, before making any
@@ -59,17 +69,36 @@ directory, before touching anything else.
 - **Versioning**: bump `style.css`'s `Version:` header AND
   `functions.php`'s `HEXNITY_WP_CHILD_VERSION` constant together on
   any real change (see `GUIDELINES.md` §6).
+- **`TEMPLATE-CONVERSION-GUIDE.md`**: update it after finishing any
+  task in the HTML→template workflow (a new template conversion, a
+  token-mapping fix, a new shared class) — see that file's own
+  "Keeping this guide current" section for exactly what to update and
+  what NOT to put there (it stays purely prescriptive — the current
+  correct process and the current template inventory only; narrative
+  of what went wrong along the way belongs in `action-map.json`, not
+  this file).
 
 ## Boundaries & rules
 
-- **Folder boundary**: confine all work (reads, writes, edits,
-  deletes) to this child theme's own directory
-  (`wp-content/themes/hexnity-wp-child/`) — do not reach into the
-  parent theme's directory to fix or verify something from here. If a
-  genuinely parent-side change is needed, that belongs to a session
-  explicitly scoped to the parent theme instead. See `GUIDELINES.md`
-  §7 for the full reasoning (this is the mirror image of the rule the
-  parent theme's own `claude.md` states for itself).
+- **STRICT folder boundary (user-mandated, 2026-08-29): work only
+  inside this child theme's own directory
+  (`wp-content/themes/hexnity-wp-child/`). No exceptions.** Do not
+  read, write, edit, delete, or even open-to-verify any file outside
+  this directory — that includes the parent theme
+  (`../hex-wp-theme-template/`) and anything else in
+  `wp-content/`. This applies even for things that feel read-only or
+  low-risk: checking how the parent defines a class, confirming an
+  enqueue handle, "just looking" at a parent file to debug something
+  in this theme. Don't. If a task cannot be completed without a
+  parent-side (or otherwise outside-this-directory) change — a new
+  reserved key, a renamed enqueue handle, a schema change, a
+  design-system class edit, anything under
+  `hex-wp-theme-template/` — **stop and tell the user explicitly what
+  needs to change and where**, rather than making the change yourself
+  or guessing at the parent's current state from memory. See
+  `GUIDELINES.md` §7 for the underlying reasoning (this is the mirror
+  image of the rule the parent theme's own `claude.md` states for
+  itself).
 - **Parent compatibility is authoritative in `GUIDELINES.md`**, not
   here — this file is about *process* (how to work in this
   directory); `GUIDELINES.md` is about *compatibility* (what would
