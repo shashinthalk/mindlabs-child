@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.18.0' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.18.1' );
 
 /**
  * Registers this theme's custom-logo support so the WordPress core

@@ -5,7 +5,7 @@
     "text_domain": "hexnity-wp-child",
     "type": "WordPress child theme of hex-wp-theme-template (Hexnity WP AI Theme)",
     "purpose": "Child theme that inherits all templates from its parent via WordPress's normal template hierarchy, and owns the theme-options.css data file the parent's Theme Options admin page writes to. Does NOT own a Tailwind build of its own (reversed 2026-08-29, see action-map.json) \u2014 the admin-configurable design-system CSS build lives and compiles in the parent theme only; this child theme keeps a reference-only, unbuilt copy of site-theme.css for a child developer to read/adapt.",
-    "version": "1.18.0",
+    "version": "1.18.1",
     "local_path": "/Users/nishanshashintha/Local Sites/mindlabz-new/app/public/wp-content/themes/hexnity-wp-child",
     "parent_theme_path": "../hex-wp-theme-template",
     "last_updated": "2026-09-01",
