@@ -65,7 +65,7 @@ $hex_skip_link_text = $hex_header_content['skip_link_text'] ?? __( 'Skip to cont
 			?>
 		</nav>
 		<span class="spacer"></span>
-		<span class="site-tel hex-small font-mono"><?php echo esc_html( $hex_phone ); ?></span>
+		<a class="site-tel hex-small font-mono" href="<?php echo esc_url( 'tel:' . preg_replace( '/\s+/', '', $hex_phone ) ); ?>"><?php echo esc_html( $hex_phone ); ?></a>
 		<a class="btn btn-primary" href="<?php echo esc_url( $hex_cta_url ); ?>">
 			<span class="lbl-long"><?php echo esc_html( $hex_cta_label ); ?></span>
 			<span class="lbl-short"><?php echo esc_html( $hex_cta_label_short ); ?></span>

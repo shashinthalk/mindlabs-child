@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.17.0' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.18.0' );
 
 /**
  * Re-enqueue this child theme's style.css to load after the parent's
