@@ -40,6 +40,74 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'HEXNITY_WP_CHILD_VERSION', '1.18.0' );
 
 /**
+ * Registers this theme's custom-logo support so the WordPress core
+ * "Site Identity" logo (Customizer → Site Identity → Logo) works out
+ * of the box. This matters because this theme is deployed to more
+ * than one site: the Customizer logo is a per-site theme_mod already
+ * stored in every site's own database the moment an editor uploads
+ * one there — unlike a value hand-fed into a Site Content JSON row on
+ * one specific install, wiring to this makes the logo appear
+ * correctly on any site running this theme with zero admin/JSON step.
+ * See hexnity_wp_child_get_site_logo() below, which reads it.
+ *
+ * @return void
+ */
+function hexnity_wp_child_setup() {
+	add_theme_support(
+		'custom-logo',
+		array(
+			'height'      => 80,
+			'width'       => 240,
+			'flex-height' => true,
+			'flex-width'  => true,
+		)
+	);
+}
+add_action( 'after_setup_theme', 'hexnity_wp_child_setup' );
+
+/**
+ * Resolves the logo image a header/footer template-part should
+ * display, in priority order:
+ *
+ * 1. An explicit `logo_url` set on that section's own Site Content
+ *    JSON (Hexnity WP → Header & Footer) — a deliberate per-section
+ *    override an editor typed in on purpose (e.g. a different image
+ *    for the dark-background footer than the light-background header).
+ * 2. The site's own Customizer "Site Identity" logo (custom_logo
+ *    theme_mod) — works automatically on every site using this theme,
+ *    no JSON edit required.
+ * 3. $fallback_url — this theme's own bundled placeholder SVG.
+ *
+ * @param array  $section_content Decoded Site Content JSON for the section (header or footer).
+ * @param string $fallback_url    URL to use if neither of the above is set.
+ * @return array{url: string, alt: string}
+ */
+function hexnity_wp_child_get_site_logo( $section_content, $fallback_url ) {
+	if ( ! empty( $section_content['logo_url'] ) ) {
+		return array(
+			'url' => $section_content['logo_url'],
+			'alt' => $section_content['logo_alt'] ?? '',
+		);
+	}
+
+	$logo_id = get_theme_mod( 'custom_logo' );
+	if ( $logo_id ) {
+		$logo_url = wp_get_attachment_image_url( $logo_id, 'full' );
+		if ( $logo_url ) {
+			return array(
+				'url' => $logo_url,
+				'alt' => get_post_meta( $logo_id, '_wp_attachment_image_alt', true ),
+			);
+		}
+	}
+
+	return array(
+		'url' => $fallback_url,
+		'alt' => '',
+	);
+}
+
+/**
  * Re-enqueue this child theme's style.css to load after the parent's
  * Tailwind build, so a one-off override rule placed directly in
  * style.css can actually win the cascade against a compiled Tailwind

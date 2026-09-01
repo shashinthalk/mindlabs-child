@@ -524,6 +524,18 @@
       "files_touched": [
         "template-parts/site-header.php"
       ]
+    },
+    {
+      "date": "2026-09-01",
+      "user_requirement": "Explicit user correction: \"dont change the json manually, because this theme linked with more than one sites. if u feed data manually, it only work in this local website. it should generate and feed the data to db with the update or there should be a way to feed data to db\" -- rejecting the earlier session action of hand-writing logo_url/logo_alt straight into this one site's Site Content DB row.",
+      "action": "Reverted that manual DB write (removed logo_url/logo_alt from both header and footer Site Content JSON rows, restoring them to their pre-existing saved keys). Replaced it with a real mechanism: added add_theme_support(\"custom-logo\") (hexnity_wp_child_setup(), after_setup_theme) and a new hexnity_wp_child_get_site_logo( ,  ) helper in functions.php, both used by template-parts/site-header.php and site-footer.php. Priority order: (1) that section's own explicit logo_url in Site Content JSON, an editor's deliberate override, (2) the site's own Customizer \"Site Identity\" logo (custom_logo theme_mod -- per-site DB data every WordPress install already has the moment someone uploads one there, so this works on any site running this theme with zero manual step), (3) the theme's bundled placeholder SVG. Verified via wp-load.php bootstrap that hexnity_wp_child_get_site_logo() correctly resolves this site's existing Customizer upload (attachment 15) now that the manual JSON override is gone.",
+      "files_touched": [
+        "functions.php",
+        "template-parts/site-header.php",
+        "template-parts/site-footer.php",
+        "Site Content DB row: header (reverted manual logo_url/logo_alt)",
+        "Site Content DB row: footer (reverted manual logo_url/logo_alt)"
+      ]
     }
   ]
 }

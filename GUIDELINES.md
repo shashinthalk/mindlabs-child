@@ -377,10 +377,18 @@ the parent's neutral ones:
 
 `brand_name` also falls back to the site's own Settings → General
 "Site Title" if omitted (then to "Mindlabz" if that's empty too).
-`logo_url` falls back to this theme's own placeholder
-`assets/images/site-logo.svg`; `logo_alt` falls back to `brand_name`.
-Point `logo_url` at a Media Library upload once a real logo exists —
-no code change needed.
+`logo_url` is only needed if you want a different image here than the
+site's normal logo — leave it out and the header uses whatever is set
+at **Appearance → Customize → Site Identity → Logo** automatically
+(this theme declares `add_theme_support('custom-logo')`; see
+`hexnity_wp_child_get_site_logo()` in `functions.php`), falling back to
+this theme's own placeholder `assets/images/site-logo.svg` only if
+neither is set. `logo_alt` falls back to the Customizer logo's own alt
+text, then to `brand_name`. Set `logo_url` explicitly only when you
+need this section's logo to differ from the Customizer one (e.g. a
+special campaign header) — for the normal case, upload the logo once
+via the Customizer and both header and footer pick it up with no JSON
+edit at all.
 `cta_label_short` is what shows on narrow screens (≤760px, where
 `cta_label` and the phone number are hidden — see `site-theme.css`'s
 `.lbl-long`/`.lbl-short`/`.site-tel` responsive rules). Primary nav
@@ -440,10 +448,14 @@ WordPress menu, not in code.
 }
 ```
 
-`logo_url` falls back to this theme's own placeholder
-`assets/images/site-logo-white.svg` (a light-on-dark variant of the
-header's logo, since the footer background is dark); `logo_alt` falls
-back to `brand_name`.
+`logo_url` follows the same three-step fallback as the header's (this
+footer's own JSON override → the site's Customizer logo → this theme's
+own placeholder, here `assets/images/site-logo-white.svg`, a
+light-on-dark variant since the footer background is dark); `logo_alt`
+falls back the same way. Since header and footer share the same
+Customizer logo by default, only set this section's `logo_url`
+explicitly if the footer genuinely needs a different image (e.g. a
+light-on-dark variant the Customizer logo isn't).
 
 `columns` is a list of footer link groups, rendered left-to-right
 after the brand/blurb block — the **third** column (index `2`, i.e.

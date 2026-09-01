@@ -13,11 +13,15 @@
  * editor customizes the JSON. See GUIDELINES.md §9.
  *
  * Logo (added 2026-09-01, replacing the former inline-SVG mark +
- * brand-name text): a real `<img>`, `logo_url`/`logo_alt` keys under
- * this same footer JSON, falling back to this theme's own
- * assets/images/site-logo-white.svg placeholder (a light-on-dark
- * variant, since the footer background is dark — see the
- * site-header.php entry for the header's own colored variant).
+ * brand-name text): a real `<img>`, resolved by
+ * hexnity_wp_child_get_site_logo() (functions.php) in priority order —
+ * this footer JSON's own `logo_url`/`logo_alt` override, else the
+ * site's own Customizer "Site Identity" logo (same one the header
+ * uses, unless this section's own `logo_url` is set to something
+ * different), else this theme's own assets/images/site-logo-white.svg
+ * placeholder (a light-on-dark variant, since the footer background is
+ * dark — see the site-header.php entry for the header's own colored
+ * variant).
  *
  * @package HexnityWPChild
  */
@@ -30,8 +34,11 @@ $hex_footer_content = function_exists( 'hex_get_site_content' ) ? hex_get_site_c
 
 $hex_brand_name = $hex_footer_content['brand_name'] ?? get_bloginfo( 'name' );
 $hex_brand_name = '' !== $hex_brand_name ? $hex_brand_name : 'Mindlabz';
-$hex_logo_url    = $hex_footer_content['logo_url'] ?? get_stylesheet_directory_uri() . '/assets/images/site-logo-white.svg';
-$hex_logo_alt    = $hex_footer_content['logo_alt'] ?? $hex_brand_name;
+$hex_logo        = function_exists( 'hexnity_wp_child_get_site_logo' )
+	? hexnity_wp_child_get_site_logo( $hex_footer_content, get_stylesheet_directory_uri() . '/assets/images/site-logo-white.svg' )
+	: array( 'url' => get_stylesheet_directory_uri() . '/assets/images/site-logo-white.svg', 'alt' => '' );
+$hex_logo_url    = $hex_logo['url'];
+$hex_logo_alt    = '' !== $hex_logo['alt'] ? $hex_logo['alt'] : $hex_brand_name;
 $hex_blurb       = $hex_footer_content['blurb'] ?? 'Sales technology and managed acquisition for Australian energy, telecom, insurance and finance brands.';
 $hex_phone       = $hex_footer_content['phone'] ?? '1300 110 829';
 $hex_email       = $hex_footer_content['email'] ?? 'info@mindlabz.com.au';

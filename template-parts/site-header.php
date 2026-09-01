@@ -13,11 +13,17 @@
  * not one page's content. See GUIDELINES.md §9.
  *
  * Logo (added 2026-09-01, replacing the former inline-SVG mark +
- * brand-name text): a real `<img>`, `logo_url`/`logo_alt` keys under
- * this same header JSON, falling back to this theme's own
- * assets/images/site-logo.svg placeholder — swap `logo_url` for a
- * Media Library upload once a real logo exists, no code change
- * needed, same pattern as template-broadband.php's `brand.logo_url`.
+ * brand-name text): a real `<img>`, resolved by
+ * hexnity_wp_child_get_site_logo() (functions.php) in priority order —
+ * this header JSON's own `logo_url`/`logo_alt` override, else the
+ * site's own Customizer "Site Identity" logo (works automatically on
+ * any site running this theme, no JSON edit needed), else this
+ * theme's own assets/images/site-logo.svg placeholder. Corrected
+ * 2026-09-01 after initially hand-writing a `logo_url` value straight
+ * into this site's DB row, which only would have worked on this one
+ * install — per explicit user correction, a theme shared across
+ * multiple sites needs this wired to something every site already has
+ * its own copy of (the Customizer logo), not manually-fed JSON.
  *
  * No mobile menu toggle by design — matches the Meridian concept's own
  * behavior (.nav-menu is simply hidden below 1000px via site-theme.css,
@@ -34,8 +40,11 @@ $hex_header_content = function_exists( 'hex_get_site_content' ) ? hex_get_site_c
 
 $hex_brand_name     = $hex_header_content['brand_name'] ?? get_bloginfo( 'name' );
 $hex_brand_name     = '' !== $hex_brand_name ? $hex_brand_name : 'Mindlabz';
-$hex_logo_url       = $hex_header_content['logo_url'] ?? get_stylesheet_directory_uri() . '/assets/images/site-logo.svg';
-$hex_logo_alt       = $hex_header_content['logo_alt'] ?? $hex_brand_name;
+$hex_logo           = function_exists( 'hexnity_wp_child_get_site_logo' )
+	? hexnity_wp_child_get_site_logo( $hex_header_content, get_stylesheet_directory_uri() . '/assets/images/site-logo.svg' )
+	: array( 'url' => get_stylesheet_directory_uri() . '/assets/images/site-logo.svg', 'alt' => '' );
+$hex_logo_url       = $hex_logo['url'];
+$hex_logo_alt       = '' !== $hex_logo['alt'] ? $hex_logo['alt'] : $hex_brand_name;
 $hex_phone          = $hex_header_content['phone'] ?? '1300 110 829';
 $hex_cta_label      = $hex_header_content['cta_label'] ?? 'Book a consultation';
 $hex_cta_label_short = $hex_header_content['cta_label_short'] ?? 'Enquire';
