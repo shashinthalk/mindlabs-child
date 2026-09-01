@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.15.0' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.16.3' );
 
 /**
  * Re-enqueue this child theme's style.css to load after the parent's
@@ -132,6 +132,30 @@ function hexnity_wp_child_enqueue_meridian_assets() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'hexnity_wp_child_enqueue_meridian_assets', 21 );
+
+/**
+ * Site-wide scroll-reveal animation. Hand-written, plain JS — no
+ * build step, same "no other tooling" approach as site-theme.css
+ * (assets/js/site-animate.js). Targets bare structural selectors
+ * that already exist in every template (section/.hero/.card/etc.),
+ * not per-template markup, so it applies sitewide without any
+ * template file needing an edit — see that file's own header comment
+ * and the ".hex-reveal"/".hex-anim-ready" rules in site-theme.css.
+ * Loaded in the footer (true) since it only needs the DOM, not
+ * render-blocking placement.
+ *
+ * @return void
+ */
+function hexnity_wp_child_enqueue_animation() {
+	wp_enqueue_script(
+		'hexnity-wp-child-site-animate',
+		get_stylesheet_directory_uri() . '/assets/js/site-animate.js',
+		array(),
+		HEXNITY_WP_CHILD_VERSION,
+		true
+	);
+}
+add_action( 'wp_enqueue_scripts', 'hexnity_wp_child_enqueue_animation' );
 
 /**
  * Contact Form 7 ("Contact form", ID 41 — the plugin's own default form,

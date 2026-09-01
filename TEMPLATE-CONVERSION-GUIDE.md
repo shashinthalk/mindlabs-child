@@ -16,7 +16,7 @@ Read this together with `claude.md` (process) and `GUIDELINES.md`
 (parent-compatibility contract) — this file is the third leg,
 specific to the HTML→template workflow.
 
-## The ten governing rules
+## The eleven governing rules
 
 1. **Only two CSS files exist in this workflow: `assets/css/src/site-theme.css`
    and `theme-options.css`. Never create a third.** No mirror file, no
@@ -73,6 +73,21 @@ specific to the HTML→template workflow.
     specifically because it duplicated what the new files already
     render. Header/footer text is a **separate** JSON store from rule
     8/9's Page Content framework — see step 10 below.
+11. **Scroll-reveal animation is already sitewide — never add a new
+    animation library or a per-template `<script>`.** Added
+    2026-09-01 (`assets/js/site-animate.js`, plain hand-written JS, no
+    build step, enqueued by `hexnity_wp_child_enqueue_animation()` in
+    `functions.php`) plus the `.hex-reveal`/`.hex-anim-ready`/
+    `.hex-in-view` rules in `site-theme.css`. It targets bare
+    structural selectors that already exist in every template
+    (`section`, `.hero`, `.page-hero`, `.brand-intro`, `.card`,
+    `.path-card`, `.sec-head`, `.form-split`, `.compliance-box`,
+    `.quote-block`, `.accordion-item`, `.stats-grid > div`) — a new
+    template written to this guide's own conventions (rule 5: reuse
+    real classes) picks up the animation automatically, with **no
+    markup change needed**. Only touch `site-animate.js`'s selector
+    list if a new template introduces a genuinely new top-level
+    section wrapper class that isn't already in that list.
 
 ## Step-by-step: how to convert a concept file
 
@@ -507,6 +522,7 @@ than duplicating it here. What matters for this workflow:
 | `template-our-brands.php` | Our Brands | Extracted from `template-home.php`'s "Brands" section (`#brands`) + its quote block, not a concept file | Yes | **Yes (backfilled 2026-08-30)** | Not standalone — `get_header()`/`get_footer()`. `.page-hero`/`.breadcrumb`, then `.brand-grid`/`.brand-card` (exact `template-home.php` markup/copy) plus `.quote-block` (the Compare Your Bills customer testimonial — carried along as brand evidence). `hero` (same 5 keys, `cta_url` falls back to `home_url('/contact/')`), `cards` (array of `tag`/`title`/`desc`/`link_label`/`url`/`domain`/`rating`), `quote` (`text`/`attribution`). Assigned to Page ID 38 ("Our Brands"), published. |
 | `template-results.php` | Results | Extracted from `template-home.php`'s "Results" section (`#results`), not a concept file | Yes | **Yes (backfilled 2026-08-30)** | Not standalone — `get_header()`/`get_footer()`. `.page-hero`/`.breadcrumb`, then the exact `.stats-grid` markup/copy. `hero` (same 5 keys, `cta_url` falls back to `home_url('/contact/')`; the lede is new copy — the original section had no lede of its own, only an eyebrow/heading), `stats` (array of `figure`/`label`). Assigned to Page ID 39 ("Results"), published. |
 | `template-contact.php` | Contact | Extracted from `template-home.php`'s "Contact" section (`#contact`), not a concept file | Yes | **Yes (backfilled 2026-08-30)** | Not standalone — `get_header()`/`get_footer()`. `.page-hero`/`.breadcrumb` (no CTA button in the hero — the form is right below it), then the exact `.form-split` form markup/copy. `hero` (`breadcrumb_label`/`heading`/`lede` only, no `cta_label`/`cta_url`), `site` (`phone`/`email`/`address`, read independently the same way `template-home.php`'s own Contact section does — not from the Site Content header/footer framework), `contact` (`eyebrow`/`heading`/`text`/`form_options`/`submit_label`/`fine_print`). Assigned to Page ID 40 ("Contact"), published. |
+| `template-broadband.php` | Broadband | Not a concept file — a new brand-led landing page built from a user text brief (no HTML/CSS source to convert), brand placeholder "More" | Yes | **Yes (backfilled 2026-09-01, Page ID 46, "More", published at `/more/`)** | Not standalone — `get_header()`/`get_footer()`. No `.page-hero`/`.breadcrumb` — deliberately different opener per the user's brief: a new `.brand-intro`/`.brand-intro-logo` centered band (logo `<img>` + blurb) instead. Then `.sec-head` + `.step-cards` (a new one-row 3-column `.card`-based grid, added 2026-09-01 replacing the initial `.rows`/`.row-item` reuse — per explicit user request to show the steps as cards in one row), each card with a hand-drawn inline-SVG icon in `.step-card-icon` (compare/switch/save, hardcoded per position, not part of the JSON schema — see `action-map.json`) for a "Compare/Switch/Save" 3-step process; two plain `.sec-head`-only copy sections (`about`, `usage`); a `.form-split` card Contact Form 7 enquiry form (same CF7 form id 41 as `template-contact.php`); and an FAQ section using the parent's existing `.accordion` component (first template in this theme to use it). Keys: `brand` (logo_url/logo_alt/blurb), `steps` (eyebrow/heading/items[num,title,desc]), `about` (eyebrow/heading/lede), `usage` (eyebrow/heading/lede), `contact` (eyebrow/heading/text/cf7_form_id), `site` (phone/email), `faq` (heading/items[question,answer]). Verified via mock-render with empty `$content` (zero warnings), a classes-used-vs-defined cross-check (zero orphaned classes), and — once Page ID 46 existed — a real render through WP's own query loop (single header/footer/doctype, zero double-encoding, zero warnings from this template's own code) — see `action-map.json` 2026-09-01. Not yet linked from the primary nav menu or footer. |
 
 ## Keeping this guide current
 

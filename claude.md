@@ -77,6 +77,53 @@ directory, before touching anything else.
   correct process and the current template inventory only; narrative
   of what went wrong along the way belongs in `action-map.json`, not
   this file).
+- **Page Content / Site Content JSON backfill — always automatic,
+  never wait to be asked** (user instruction, 2026-09-01: *"add rule
+  to generate json always, because I dont need to tell u this
+  again"*). `TEMPLATE-CONVERSION-GUIDE.md` step 9 and `GUIDELINES.md`
+  §9's backfill invariant are standing rules, not one-off requests —
+  check them, unprompted, as a normal part of finishing any task that
+  touches a template or the header/footer:
+  - Any time you create/convert a template **and** a Page is already
+    known to be assigned to it, build the default JSON payload and
+    call `hex_save_page_content()` immediately, in the same task, with
+    no separate confirmation step — this is a low-risk, idempotent,
+    page-scoped DB write, not the kind of action that needs sign-off.
+  - If no Page is assigned yet, note that clearly as an open item (not
+    a background detail to skip) so it isn't forgotten — but don't
+    block the rest of the task on it, and don't require the user to
+    explicitly say "now generate the JSON" once a Page does exist.
+  - Any time you're already touching a template's content or the
+    header/footer for another reason, re-check
+    `hex_get_page_content()` / `hex_get_site_content()` actually come
+    back non-empty before considering the task done — backfill again
+    immediately if a row has gone missing (DB reset, migration),
+    without being asked.
+  - **How to actually reach this site's database (discovered
+    2026-09-01, template-broadband.php's backfill):** this is a Local
+    (by Flywheel) site. The system `php` on `PATH` cannot reach its
+    MySQL — Local runs a per-site MySQL instance on its own socket, and
+    only Local's own bundled PHP build is configured to find it. Use:
+    ```
+    "/Users/nishanshashintha/Library/Application Support/Local/lightning-services/php-8.2.29+0/bin/darwin-arm64/bin/php" \
+      -c "/Users/nishanshashintha/Library/Application Support/Local/run/IEpT99PEB/conf/php/php.ini" \
+      /path/to/a/temp-script-in-this-theme-dir.php
+    ```
+    (that `php.ini`'s `mysqli.default_socket` points at
+    `run/IEpT99PEB/mysql/mysqld.sock` — the run-ID `IEpT99PEB` is
+    specific to this Local site and was confirmed live by bootstrapping
+    `wp-load.php` and checking `get_bloginfo('url')` returned
+    `http://mindlabz-new.local`; if Local ever reassigns the run ID,
+    re-find it the same way — search
+    `~/Library/Application Support/Local/run/*/mysql/mysqld.sock` for
+    the one that's actually running, or match against
+    `~/Library/Application Support/Local/run/*/conf/mysql/my.cnf`).
+    Do **not** hit the live site over HTTP for verification — this site
+    has site-wide password protection active, which will just redirect
+    every request; instead bootstrap `wp-load.php`, use
+    `query_posts()`/`the_post()` to set up the loop for a specific page
+    ID, then `include` the template file directly and inspect the
+    captured output.
 
 ## Boundaries & rules
 

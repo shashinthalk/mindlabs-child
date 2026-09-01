@@ -75,6 +75,10 @@
  * underline added to the existing .nav-link) — written in the exact
  * same var(--hex-{key}, {default}) pattern as everything above.
  *
+ * 2026-09-01: added .brand-intro/.brand-intro-logo (centered logo +
+ * blurb band for template-broadband.php's "More" brand intro — see
+ * that file and TEMPLATE-CONVERSION-GUIDE.md's inventory).
+ *
  * @package HexnityWPChild
  */
 
@@ -1663,6 +1667,87 @@
 	}
 
 	/*
+	 * Brand intro — a centered brand logo image + short blurb, for a
+	 * page opening on one specific comparison brand rather than the
+	 * shared .page-hero title band. Generic name/pattern per
+	 * TEMPLATE-CONVERSION-GUIDE.md step 6 so any future brand-led page
+	 * can reuse it. Markup:
+	 *   <div class="brand-intro">
+	 *     <div class="hex-container">
+	 *       <img class="brand-intro-logo" src="..." alt="...">
+	 *       <p class="hex-small">Blurb</p>
+	 *     </div>
+	 *   </div>
+	 */
+	.brand-intro {
+		padding: var(--hex-section-padding-xl) 0 var(--hex-section-padding-lg);
+		text-align: center;
+		background: var(--color-site-section-muted);
+	}
+
+	.brand-intro .hex-container {
+		max-width: 640px;
+	}
+
+	.brand-intro-logo {
+		display: block;
+		margin: 0 auto var(--hex-spacing-lg, 32px);
+		max-height: 56px;
+		width: auto;
+	}
+
+	/*
+	 * Step cards — a 3-up row of numbered cards, for a short ordered
+	 * process (e.g. template-broadband.php's "How it works" section)
+	 * where each step is equally weighted rather than a linked,
+	 * full-width list like .rows/.row-item. Built on the existing
+	 * .card component rather than a parallel lookalike. Markup:
+	 *   <div class="step-cards">
+	 *     <div class="card step-card">
+	 *       <span class="step-card-icon"><svg class="icon icon-lg">...</svg></span>
+	 *       <span class="step-card-num hex-h5 font-mono">01</span>
+	 *       <h3 class="hex-h3">Title</h3>
+	 *       <p class="hex-small">Desc</p>
+	 *     </div>
+	 *   </div>
+	 */
+	.step-cards {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: var(--hex-spacing-lg, 32px);
+	}
+
+	.step-card-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: color-mix(in srgb, var(--hex-color-primary) 14%, transparent);
+		color: var(--hex-color-primary);
+		margin-bottom: var(--hex-spacing-md, 24px);
+	}
+
+	.step-card-icon .icon {
+		color: inherit;
+	}
+
+	.step-card-num {
+		display: block;
+		color: var(--hex-color-accent);
+		margin-bottom: var(--hex-spacing-sm, 16px);
+	}
+
+	.step-card h3 {
+		margin-bottom: var(--hex-spacing-xs, 8px);
+	}
+
+	.step-card p {
+		color: var(--hex-color-secondary);
+	}
+
+	/*
 	 * Responsive breakpoints for the Meridian layout. Font-size is
 	 * never touched here — every text element already carries one of
 	 * the 11 fluid .hex-* classes, which scale continuously on their
@@ -1679,7 +1764,8 @@
 		}
 
 		.brand-grid,
-		.paths-split {
+		.paths-split,
+		.step-cards {
 			grid-template-columns: 1fr;
 		}
 
@@ -1791,5 +1877,31 @@
 			flex: 1 1 100%;
 			justify-content: center;
 		}
+	}
+
+	/*
+	 * Site-wide scroll-reveal animation, driven by
+	 * assets/js/site-animate.js — applies to every template via bare
+	 * structural selectors (section/.hero/.page-hero/.brand-intro/
+	 * .card/.path-card/.sec-head/.form-split/.compliance-box/
+	 * .quote-block/.accordion-item/.stats-grid > div), not per-template
+	 * markup, so no template file needed editing to pick it up.
+	 * Progressive enhancement: content only ever gets hidden once JS
+	 * confirms it's running (document.documentElement carries
+	 * .hex-anim-ready, added by site-animate.js on DOMContentLoaded) —
+	 * with JS off, blocked, or unsupported, everything stays fully
+	 * visible. site-animate.js itself skips entirely when the visitor
+	 * has prefers-reduced-motion set, so .hex-anim-ready is never added
+	 * for them either.
+	 */
+	.hex-anim-ready .hex-reveal {
+		opacity: 0;
+		transform: translateY(24px);
+		transition: opacity 600ms ease, transform 600ms ease;
+	}
+
+	.hex-anim-ready .hex-reveal.hex-in-view {
+		opacity: 1;
+		transform: none;
 	}
 }
