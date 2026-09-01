@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 40" role="img" aria-labelledby="siteLogoTitle">
+	<title id="siteLogoTitle">Mindlabz</title>
+	<circle cx="18" cy="20" r="15" fill="#D8471B"/>
+	<path d="M18 9v6M18 25v6M7 20h6M23 20h6" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+	<text x="44" y="28" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="26" fill="#14150F">Mindlabz</text>
+</svg>

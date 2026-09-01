@@ -12,6 +12,13 @@
  * this footer looks identical to the Home page's footer until an
  * editor customizes the JSON. See GUIDELINES.md §9.
  *
+ * Logo (added 2026-09-01, replacing the former inline-SVG mark +
+ * brand-name text): a real `<img>`, `logo_url`/`logo_alt` keys under
+ * this same footer JSON, falling back to this theme's own
+ * assets/images/site-logo-white.svg placeholder (a light-on-dark
+ * variant, since the footer background is dark — see the
+ * site-header.php entry for the header's own colored variant).
+ *
  * @package HexnityWPChild
  */
 
@@ -23,6 +30,8 @@ $hex_footer_content = function_exists( 'hex_get_site_content' ) ? hex_get_site_c
 
 $hex_brand_name = $hex_footer_content['brand_name'] ?? get_bloginfo( 'name' );
 $hex_brand_name = '' !== $hex_brand_name ? $hex_brand_name : 'Mindlabz';
+$hex_logo_url    = $hex_footer_content['logo_url'] ?? get_stylesheet_directory_uri() . '/assets/images/site-logo-white.svg';
+$hex_logo_alt    = $hex_footer_content['logo_alt'] ?? $hex_brand_name;
 $hex_blurb       = $hex_footer_content['blurb'] ?? 'Sales technology and managed acquisition for Australian energy, telecom, insurance and finance brands.';
 $hex_phone       = $hex_footer_content['phone'] ?? '1300 110 829';
 $hex_email       = $hex_footer_content['email'] ?? 'info@mindlabz.com.au';
@@ -106,9 +115,8 @@ $hex_footer_bottom_links = $hex_footer_content['bottom_links'] ?? array(
 	<div class="hex-container">
 		<div class="footer-grid hex-small">
 			<div>
-				<a class="site-logo hex-h3 font-accent" href="<?php echo esc_url( home_url( '/' ) ); ?>">
-					<span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.2" fill="#fff"/><path d="M12 2.5v3.5M12 18v3.5M2.5 12H6M18 12h3.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span>
-					<?php echo esc_html( $hex_brand_name ); ?>
+				<a class="site-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>">
+					<img class="site-logo-img" src="<?php echo esc_url( $hex_logo_url ); ?>" alt="<?php echo esc_attr( $hex_logo_alt ); ?>">
 				</a>
 				<p class="footer-blurb"><?php echo esc_html( $hex_blurb ); ?></p>
 			</div>

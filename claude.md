@@ -84,15 +84,23 @@ directory, before touching anything else.
   §9's backfill invariant are standing rules, not one-off requests —
   check them, unprompted, as a normal part of finishing any task that
   touches a template or the header/footer:
-  - Any time you create/convert a template **and** a Page is already
-    known to be assigned to it, build the default JSON payload and
-    call `hex_save_page_content()` immediately, in the same task, with
-    no separate confirmation step — this is a low-risk, idempotent,
-    page-scoped DB write, not the kind of action that needs sign-off.
-  - If no Page is assigned yet, note that clearly as an open item (not
-    a background detail to skip) so it isn't forgotten — but don't
-    block the rest of the task on it, and don't require the user to
-    explicitly say "now generate the JSON" once a Page does exist.
+  - **Page Content backfill is now code-automated, not a manual
+    per-session step** (added 2026-09-01, per explicit user report
+    that assigning a template to a Page generated no JSON at all):
+    `functions.php`'s `hexnity_wp_child_maybe_backfill_page_content()`,
+    hooked to `save_post_page`, calls `hex_save_page_content()` itself
+    the moment ANY Page is saved with a registered template and no
+    content yet — see `TEMPLATE-CONVERSION-GUIDE.md` rule 9. When you
+    create/convert a template, your job is to add its default payload
+    to `hexnity_wp_child_get_template_defaults()`'s registry (this
+    *is* the "build the default JSON payload" step now) — you no
+    longer need to know or check whether a Page is already assigned;
+    the hook handles that whenever a Page (existing or future) picks
+    up that template.
+  - If a template genuinely has no registry entry yet (an oversight,
+    or a template that predates this mechanism), note that clearly as
+    an open item so it isn't forgotten — but don't block the rest of
+    the task on it.
   - Any time you're already touching a template's content or the
     header/footer for another reason, re-check
     `hex_get_page_content()` / `hex_get_site_content()` actually come

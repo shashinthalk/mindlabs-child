@@ -285,12 +285,19 @@ the parent's neutral ones:
   (this theme's own — same delegation pattern the parent theme uses
   for its own header.php/footer.php).
 - Those two template-parts read `hex_get_site_content( 'header' )` /
-  `hex_get_site_content( 'footer' )` for their text — brand name,
-  phone, CTA label/URL (header); blurb, phone, email, ABN, address,
-  footer link columns, bottom-bar legal links (footer) — each with a
-  `?? 'fallback'` matching `template-home.php`'s own original
+  `hex_get_site_content( 'footer' )` for their text — brand name, logo
+  image, phone, CTA label/URL (header); blurb, phone, email, ABN,
+  address, footer link columns, bottom-bar legal links (footer) — each
+  with a `?? 'fallback'` matching `template-home.php`'s own original
   hardcoded copy exactly, so nothing visually changes until an editor
-  saves JSON on the "Header & Footer" admin page.
+  saves JSON on the "Header & Footer" admin page. The logo (added
+  2026-09-01) is a real `<img class="site-logo-img">`, not text —
+  `logo_url`/`logo_alt` in both sections' JSON, falling back to this
+  theme's own `assets/images/site-logo.svg` (header, colored — light
+  background) / `assets/images/site-logo-white.svg` (footer,
+  light-on-dark — dark background); the two sections' logos are
+  independent, so they can be swapped to different images if ever
+  needed, even though they default to visually matching assets.
 - The header's primary nav is a real WP nav menu (`theme_location =>
   'primary'`), not a hardcoded link array — `.nav-link` is applied to
   every menu `<a>` automatically by a filter the **parent** theme
@@ -358,6 +365,8 @@ the parent's neutral ones:
 ```json
 {
   "brand_name": "Mindlabz",
+  "logo_url": "https://example.com/wp-content/uploads/2026/09/logo.svg",
+  "logo_alt": "Mindlabz",
   "phone": "1300 110 829",
   "cta_label": "Book a consultation",
   "cta_label_short": "Enquire",
@@ -368,6 +377,10 @@ the parent's neutral ones:
 
 `brand_name` also falls back to the site's own Settings → General
 "Site Title" if omitted (then to "Mindlabz" if that's empty too).
+`logo_url` falls back to this theme's own placeholder
+`assets/images/site-logo.svg`; `logo_alt` falls back to `brand_name`.
+Point `logo_url` at a Media Library upload once a real logo exists —
+no code change needed.
 `cta_label_short` is what shows on narrow screens (≤760px, where
 `cta_label` and the phone number are hidden — see `site-theme.css`'s
 `.lbl-long`/`.lbl-short`/`.site-tel` responsive rules). Primary nav
@@ -398,6 +411,8 @@ WordPress menu, not in code.
 ```json
 {
   "brand_name": "Mindlabz",
+  "logo_url": "https://example.com/wp-content/uploads/2026/09/logo-white.svg",
+  "logo_alt": "Mindlabz",
   "blurb": "Sales technology and managed acquisition for Australian energy, telecom, insurance and finance brands.",
   "phone": "1300 110 829",
   "email": "info@mindlabz.com.au",
@@ -424,6 +439,11 @@ WordPress menu, not in code.
   ]
 }
 ```
+
+`logo_url` falls back to this theme's own placeholder
+`assets/images/site-logo-white.svg` (a light-on-dark variant of the
+header's logo, since the footer background is dark); `logo_alt` falls
+back to `brand_name`.
 
 `columns` is a list of footer link groups, rendered left-to-right
 after the brand/blurb block — the **third** column (index `2`, i.e.

@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.16.3' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.17.0' );
 
 /**
  * Re-enqueue this child theme's style.css to load after the parent's
@@ -177,3 +177,528 @@ function hexnity_wp_child_cf7_disable_autop() {
 	return false;
 }
 add_filter( 'wpcf7_autop_or_not', 'hexnity_wp_child_cf7_disable_autop' );
+
+/**
+ * Per-template default Page Content JSON payloads, added 2026-09-01
+ * per explicit user report: assigning a Page to template-broadband.php
+ * (or any other template here) did not generate any JSON for it — the
+ * previous process only ever backfilled a page's JSON via a manual,
+ * one-off temp script run by a session, per page, by hand (see
+ * action-map.json's 2026-09-01 "More" page entries). This makes that
+ * automatic and general, for every template in this theme.
+ *
+ * Every array below is a straight transcription of that template's own
+ * hardcoded `??` fallback values (the exact same copy already rendered
+ * today for a page with no saved JSON) — this does not change what any
+ * page looks like; it just makes that same default copy visible and
+ * editable in the "Page Content (JSON)" meta box immediately, instead
+ * of only being visible by reading the template's PHP source. Keep
+ * this in sync any time a template's own `??` fallback copy changes —
+ * see TEMPLATE-CONVERSION-GUIDE.md rule 9.
+ *
+ * Verified safe to round-trip through hex_save_page_content()/
+ * hex_get_page_content() first, via a throwaway draft test page
+ * (created and deleted in the same temp script, never committed):
+ * inline HTML with a `class` attribute (e.g.
+ * `<span class="accent-text">...</span>`, used in several of these
+ * templates' `wp_kses_post()`-rendered heading fields) survives the
+ * save/read round trip unstripped.
+ *
+ * @param string $template_slug The value of get_page_template_slug().
+ * @return array|null The default payload, or null if this template
+ *                     isn't registered here (nothing will be saved).
+ */
+function hexnity_wp_child_get_template_defaults( $template_slug ) {
+	switch ( $template_slug ) {
+
+		case 'template-broadband.php':
+			return array(
+				'brand' => array(
+					'logo_url' => get_stylesheet_directory_uri() . '/assets/images/brand-more-logo.svg',
+					'logo_alt' => 'More',
+					'blurb'    => 'More is our broadband and mobile comparison and switching service — one call to see what\'s available at your address and get connected, without the hassle.',
+				),
+				'steps' => array(
+					'eyebrow' => 'How it works',
+					'heading' => 'Switching And Moving Is As Simple As 1... 2... 3',
+					'items'   => array(
+						array(
+							'num'   => '01',
+							'title' => 'Compare',
+							'desc'  => 'Enter your address! Tell us a bit about your needs. Our process is simple with NO complicated questions.',
+						),
+						array(
+							'num'   => '02',
+							'title' => 'Switch',
+							'desc'  => 'We\'ll tell you about the plans available in your area and recommend one which is most suited to your needs.',
+						),
+						array(
+							'num'   => '03',
+							'title' => 'Save',
+							'desc'  => 'Confirm your details and get connected. The process is easy and there will be no interruption at all.',
+						),
+					),
+				),
+				'about' => array(
+					'eyebrow' => 'About More',
+					'heading' => 'The simpler way to compare and switch broadband',
+					'lede'    => 'More compares plans across trusted broadband and mobile providers so you don\'t have to — balancing price, data and network coverage to find the plan that actually fits how you use your connection.',
+				),
+				'usage' => array(
+					'eyebrow' => 'Why switch with More',
+					'heading' => 'One call, no lock-in confusion, no chasing paperwork',
+					'lede'    => 'A real consultant handles the comparison, the paperwork and the handover with your new provider, so switching takes one phone call rather than an afternoon.',
+				),
+				'contact' => array(
+					'eyebrow'     => 'Get in touch',
+					'heading'     => 'Check what\'s available at your address',
+					'text'        => 'Tell us a little about your needs and we\'ll come back with the plans available in your area — no complicated questions, no obligation.',
+					'cf7_form_id' => 41,
+				),
+				'site' => array(
+					'phone' => '1300 110 829',
+					'email' => 'info@mindlabz.com.au',
+				),
+				'faq' => array(
+					'heading' => 'Frequently asked questions',
+					'items'   => array(
+						array(
+							'question' => 'How long does switching take?',
+							'answer'   => 'Most switches are confirmed in one call. Your new connection is usually active within a few business days, depending on your address and current provider.',
+						),
+						array(
+							'question' => 'Will there be any interruption to my service?',
+							'answer'   => 'No — we time the switch so your existing connection stays live until the new one is ready, with no gap in service.',
+						),
+						array(
+							'question' => 'Is there a cost to use this service?',
+							'answer'   => 'No, comparing and switching through us is free. We\'re paid by the provider you choose, not by you.',
+						),
+						array(
+							'question' => 'What information do I need to provide?',
+							'answer'   => 'Just your address and a few details about how you use your connection — no account numbers or paperwork needed to get a recommendation.',
+						),
+						array(
+							'question' => 'Can I switch if I\'m still in a contract?',
+							'answer'   => 'Often, yes. Tell us your current provider and we\'ll let you know what your options are, including any exit fees to weigh up.',
+						),
+					),
+				),
+			);
+
+		case 'template-services.php':
+			return array(
+				'hero' => array(
+					'breadcrumb_label' => 'Services',
+					'heading'          => 'Four services. One accountable <span class="accent-text">partner</span>.',
+					'lede'             => 'Retailers come to us for volume they can defend in an audit. Households come to us because switching should take four minutes, not four hours.',
+					'cta_label'        => 'Book a consultation',
+					'cta_url'          => home_url( '/contact/' ),
+				),
+				'rows' => array(
+					array(
+						'num'   => '01',
+						'title' => 'AI & IT Solutions',
+						'desc'  => 'Lead scoring, conversation automation, live performance dashboards and sales workflow optimisation, built for regulated Australian retail.',
+						'tags'  => array( 'Intent scoring', 'Voice & chat AI', 'Partner dashboards', 'CRM integration' ),
+						'url'   => home_url( '/ai-technology/' ),
+					),
+					array(
+						'num'   => '02',
+						'title' => 'Energy Broking',
+						'desc'  => 'Comparing electricity and gas plans across trusted retailers — balancing price, contract terms and sustainability for households and businesses.',
+						'tags'  => array( 'Residential', 'Small business', 'Solar-aware plans' ),
+						'url'   => '#',
+					),
+					array(
+						'num'   => '03',
+						'title' => 'Broadband & Mobile',
+						'desc'  => 'End-to-end telecom plan comparison across pricing, data allowance, network coverage and independent quality benchmarks.',
+						'tags'  => array( 'NBN', 'Mobile', 'Bundles' ),
+						'url'   => '#',
+					),
+					array(
+						'num'   => '04',
+						'title' => 'Private Health Cover',
+						'desc'  => 'Policy and provider comparison focused on coverage depth, waiting periods, premium value and business risk protection.',
+						'tags'  => array( 'Hospital', 'Extras', 'Corporate cover' ),
+						'url'   => '#',
+					),
+				),
+			);
+
+		case 'template-our-brands.php':
+			return array(
+				'hero' => array(
+					'breadcrumb_label' => 'Our Brands',
+					'heading'          => 'We don\'t just sell the service — <span class="accent-text">we run it.</span>',
+					'lede'             => 'Our comparison brands are where the technology is proven: real households, real switches, real compliance load. That\'s what partners are actually buying.',
+					'cta_label'        => 'Partner with us',
+					'cta_url'          => home_url( '/contact/' ),
+				),
+				'cards' => array(
+					array(
+						'tag'        => 'Consumer · Energy & broadband',
+						'title'      => 'Compare Your Bills',
+						'desc'       => 'Households compare electricity, gas, broadband and mobile plans and switch over the phone with a real consultant — free to the customer, end to end.',
+						'link_label' => 'Visit Compare Your Bills',
+						'url'        => '#',
+						'domain'     => 'compareyourbills.com.au',
+						'rating'     => '★★★★★',
+					),
+					array(
+						'tag'        => 'Consumer · Bill review',
+						'title'      => 'Check Your Bill',
+						'desc'       => 'A second opinion on what you\'re paying. Send through a bill and get a like-for-like breakdown against what\'s actually available in your postcode today.',
+						'link_label' => 'Visit Check Your Bill',
+						'url'        => '#',
+						'domain'     => 'checkyourbill.com.au',
+						'rating'     => '★★★★★',
+					),
+				),
+				'quote' => array(
+					'text'        => 'Compare Your Bills\' staff were very professional and helped me find the best package that met my needs — the whole transfer of electricity and gas was easy and simplified.',
+					'attribution' => 'Rizwan Saeed · Compare Your Bills customer',
+				),
+			);
+
+		case 'template-results.php':
+			return array(
+				'hero' => array(
+					'breadcrumb_label' => 'Results',
+					'heading'          => 'What partnership looks like in <span class="accent-text">practice</span>.',
+					'lede'             => 'Every figure below is pulled from the same dashboards our partners see themselves — updated in real time, not a monthly deck.',
+					'cta_label'        => 'Book a partner consultation',
+					'cta_url'          => home_url( '/contact/' ),
+				),
+				'stats' => array(
+					array(
+						'figure' => '<em>+124%</em>',
+						'label'  => 'Sales growth delivered for partner brands',
+					),
+					array(
+						'figure' => '18',
+						'label'  => 'Energy, telco and insurance brands supported',
+					),
+					array(
+						'figure' => '100%',
+						'label'  => 'Of sales calls recorded and QA sampled',
+					),
+					array(
+						'figure' => '4 min',
+						'label'  => 'Average time for a household to switch',
+					),
+				),
+			);
+
+		case 'template-contact.php':
+			return array(
+				'hero' => array(
+					'breadcrumb_label' => 'Contact',
+					'heading'          => 'Let\'s talk about your <span class="accent-text">next move</span>.',
+					'lede'             => 'Tell us what you\'re trying to grow. We\'ll come back within one business day with a view on whether we\'re the right partner — and what it would take.',
+				),
+				'contact' => array(
+					'eyebrow'     => 'Get in touch',
+					'heading'     => 'Book a consultation',
+					'text'        => 'Tell us what you\'re trying to grow. We\'ll come back within one business day with a view on whether we\'re the right partner — and what it would take.',
+					'cf7_form_id' => 41,
+				),
+				'site' => array(
+					'phone'   => '1300 110 829',
+					'email'   => 'info@mindlabz.com.au',
+					'address' => '10.1, 3 Bowen Crescent, Melbourne VIC 3004',
+				),
+			);
+
+		case 'template-ai-technology.php':
+			return array(
+				'hero' => array(
+					'breadcrumb_label' => 'AI & Technology',
+					'heading'          => 'A sales floor that runs on <span class="accent-text">evidence</span>, not instinct.',
+					'lede'             => 'Every enquiry is scored, routed, worked and recorded. Partners see the same numbers we do, in the same hour — not in a monthly spreadsheet.',
+					'cta_label'        => 'Request a walkthrough',
+					'cta_url'          => home_url( '/contact/' ),
+				),
+				'features' => array(
+					array(
+						'index' => 'A',
+						'title' => 'Intent scoring',
+						'desc'  => 'Models rank every enquiry on likelihood to convert before an agent picks up the phone.',
+					),
+					array(
+						'index' => 'B',
+						'title' => 'Smart routing',
+						'desc'  => 'Leads land with the team, script and offer most likely to close them — automatically.',
+					),
+					array(
+						'index' => 'C',
+						'title' => 'Conversation automation',
+						'desc'  => 'AI handles qualification, callbacks and follow-up so people spend their time on live intent.',
+					),
+					array(
+						'index' => 'D',
+						'title' => 'Live partner dashboards',
+						'desc'  => 'Volume, conversion, cost-per-sale and QA outcomes, shared with partners in real time.',
+					),
+					array(
+						'index' => 'E',
+						'title' => 'Compliance by default',
+						'desc'  => 'Consent capture, call recording and audit trails aligned to ISO/IEC 27001:2022.',
+					),
+				),
+				'compliance' => array(
+					'heading' => 'ISO/IEC 27001:2022 certified since 2022',
+					'text'    => 'Certified information security management, independently accredited. Every consumer interaction is consented, recorded and auditable — the standard energy and telco retailers are contractually required to hold their partners to.',
+					'badges'  => array( 'ISO/IEC 27001:2022', 'IAS / IAF accredited', 'Consent-based data only' ),
+				),
+			);
+
+		case 'template-home.php':
+			return array(
+				'hero' => array(
+					'eyebrow'              => '<b>Melbourne</b> · Energy · Telecom · Insurance · Finance',
+					'heading'              => 'Growth for the brands that <span class="accent-text">power</span>, <span class="accent-text">connect</span> and <span class="accent-text">cover</span> Australia.',
+					'lede'                 => 'Mindlabz combines AI-built sales technology with trained, compliant human teams — and proves it every day through our own consumer brands, Compare Your Bills and Check Your Bill.',
+					'cta_primary_label'   => 'Partner with us',
+					'cta_primary_url'     => '#contact',
+					'cta_secondary_label' => 'Explore our services',
+					'cta_secondary_url'   => '#services',
+					'card' => array(
+						'label'   => 'Partner sales growth',
+						'figure'  => '<em>+124%</em>',
+						'caption' => 'Average uplift delivered across supported retail brands.',
+						'stats'   => array(
+							array(
+								'value' => '18',
+								'label' => 'Brands supported',
+							),
+							array(
+								'value' => '27001',
+								'label' => 'ISO/IEC certified',
+							),
+						),
+					),
+				),
+				'logo_strip' => array(
+					'label' => 'Trusted across energy, telecom & insurance',
+					'names' => array( 'Origin', 'AGL', 'EnergyAustralia', 'Momentum', 'Sumo', 'OVO Energy', '1st Energy', 'Nectr', 'Aussie Broadband', 'Next Business Energy' ),
+				),
+				'services' => array(
+					'eyebrow' => 'What we do',
+					'heading' => 'Four services. One accountable partner.',
+					'lede'    => 'Retailers come to us for volume they can defend in an audit. Households come to us because switching should take four minutes, not four hours.',
+					'rows'    => array(
+						array(
+							'num'   => '01',
+							'title' => 'AI & IT Solutions',
+							'desc'  => 'Lead scoring, conversation automation, live performance dashboards and sales workflow optimisation, built for regulated Australian retail.',
+							'tags'  => array( 'Intent scoring', 'Voice & chat AI', 'Partner dashboards', 'CRM integration' ),
+							'url'   => '#platform',
+						),
+						array(
+							'num'   => '02',
+							'title' => 'Energy Broking',
+							'desc'  => 'Comparing electricity and gas plans across trusted retailers — balancing price, contract terms and sustainability for households and businesses.',
+							'tags'  => array( 'Residential', 'Small business', 'Solar-aware plans' ),
+							'url'   => '#',
+						),
+						array(
+							'num'   => '03',
+							'title' => 'Broadband & Mobile',
+							'desc'  => 'End-to-end telecom plan comparison across pricing, data allowance, network coverage and independent quality benchmarks.',
+							'tags'  => array( 'NBN', 'Mobile', 'Bundles' ),
+							'url'   => '#',
+						),
+						array(
+							'num'   => '04',
+							'title' => 'Private Health Cover',
+							'desc'  => 'Policy and provider comparison focused on coverage depth, waiting periods, premium value and business risk protection.',
+							'tags'  => array( 'Hospital', 'Extras', 'Corporate cover' ),
+							'url'   => '#',
+						),
+					),
+				),
+				'platform' => array(
+					'eyebrow'   => '<b>AI & Technology</b>',
+					'heading'   => 'A sales floor that runs on evidence, not instinct.',
+					'lede'      => 'Every enquiry is scored, routed, worked and recorded. Partners see the same numbers we do, in the same hour — not in a monthly spreadsheet.',
+					'cta_label' => 'Request a walkthrough',
+					'cta_url'   => '#contact',
+					'features'  => array(
+						array(
+							'index' => 'A',
+							'title' => 'Intent scoring',
+							'desc'  => 'Models rank every enquiry on likelihood to convert before an agent picks up the phone.',
+						),
+						array(
+							'index' => 'B',
+							'title' => 'Smart routing',
+							'desc'  => 'Leads land with the team, script and offer most likely to close them — automatically.',
+						),
+						array(
+							'index' => 'C',
+							'title' => 'Conversation automation',
+							'desc'  => 'AI handles qualification, callbacks and follow-up so people spend their time on live intent.',
+						),
+						array(
+							'index' => 'D',
+							'title' => 'Live partner dashboards',
+							'desc'  => 'Volume, conversion, cost-per-sale and QA outcomes, shared with partners in real time.',
+						),
+						array(
+							'index' => 'E',
+							'title' => 'Compliance by default',
+							'desc'  => 'Consent capture, call recording and audit trails aligned to ISO/IEC 27001:2022.',
+						),
+					),
+				),
+				'results' => array(
+					'eyebrow' => 'By the numbers',
+					'heading' => 'What partnership looks like in practice.',
+					'stats'   => array(
+						array(
+							'figure' => '<em>+124%</em>',
+							'label'  => 'Sales growth delivered for partner brands',
+						),
+						array(
+							'figure' => '18',
+							'label'  => 'Energy, telco and insurance brands supported',
+						),
+						array(
+							'figure' => '100%',
+							'label'  => 'Of sales calls recorded and QA sampled',
+						),
+						array(
+							'figure' => '4 min',
+							'label'  => 'Average time for a household to switch',
+						),
+					),
+				),
+				'brands' => array(
+					'eyebrow' => 'Owned consumer brands',
+					'heading' => 'We don\'t just sell the service — <span class="accent-text">we run it.</span>',
+					'lede'    => 'Our comparison brands are where the technology is proven: real households, real switches, real compliance load. That\'s what partners are actually buying.',
+					'cards'   => array(
+						array(
+							'tag'        => 'Consumer · Energy & broadband',
+							'title'      => 'Compare Your Bills',
+							'desc'       => 'Households compare electricity, gas, broadband and mobile plans and switch over the phone with a real consultant — free to the customer, end to end.',
+							'link_label' => 'Visit Compare Your Bills',
+							'url'        => '#',
+							'domain'     => 'compareyourbills.com.au',
+							'rating'     => '★★★★★',
+						),
+						array(
+							'tag'        => 'Consumer · Bill review',
+							'title'      => 'Check Your Bill',
+							'desc'       => 'A second opinion on what you\'re paying. Send through a bill and get a like-for-like breakdown against what\'s actually available in your postcode today.',
+							'link_label' => 'Visit Check Your Bill',
+							'url'        => '#',
+							'domain'     => 'checkyourbill.com.au',
+							'rating'     => '★★★★★',
+						),
+					),
+				),
+				'quote' => array(
+					'text'        => 'Compare Your Bills\' staff were very professional and helped me find the best package that met my needs — the whole transfer of electricity and gas was easy and simplified.',
+					'attribution' => 'Rizwan Saeed · Compare Your Bills customer',
+				),
+				'compliance' => array(
+					'heading' => 'ISO/IEC 27001:2022 certified since 2022',
+					'text'    => 'Certified information security management, independently accredited. Every consumer interaction is consented, recorded and auditable — the standard energy and telco retailers are contractually required to hold their partners to.',
+					'badges'  => array( 'ISO/IEC 27001:2022', 'IAS / IAF accredited', 'Consent-based data only' ),
+				),
+				'paths' => array(
+					array(
+						'kicker'    => 'For retailers & brands',
+						'heading'   => 'Grow your book, defensibly.',
+						'text'      => 'You need connected customers, compliant channels and a partner who reports honestly. Let\'s talk volume, unit economics and integration.',
+						'cta_label' => 'Book a partner consultation',
+						'cta_url'   => '#contact',
+						'cta_style' => 'primary',
+					),
+					array(
+						'kicker'    => 'For households & business',
+						'heading'   => 'Find out if you\'re overpaying.',
+						'text'      => 'Power, gas, broadband, mobile or health cover — a like-for-like comparison takes about four minutes and costs you nothing.',
+						'cta_label' => 'Compare my bills',
+						'cta_url'   => '#',
+						'cta_style' => 'ghost',
+					),
+				),
+				'contact' => array(
+					'eyebrow'      => 'Get in touch',
+					'heading'      => 'Book a consultation',
+					'text'         => 'Tell us what you\'re trying to grow. We\'ll come back within one business day with a view on whether we\'re the right partner — and what it would take.',
+					'form_options' => array( 'A retailer or brand partner', 'A household comparing bills', 'A business comparing bills', 'A supplier or vendor' ),
+					'submit_label' => 'Send enquiry',
+					'fine_print'   => 'We\'ll only use these details to respond to your enquiry. See our Privacy Policy.',
+				),
+				'site' => array(
+					'phone'   => '1300 110 829',
+					'email'   => 'info@mindlabz.com.au',
+					'address' => '10.1, 3 Bowen Crescent, Melbourne VIC 3004',
+				),
+			);
+
+		default:
+			return null;
+	}
+}
+
+/**
+ * Auto-generates a page's default Page Content JSON the moment it's
+ * assigned one of this child theme's own templates, if that page
+ * doesn't already have any saved content — per explicit user report
+ * (2026-09-01): "when I creating new page and assign broadband
+ * template to that page, it should generate the json. then if i
+ * create new page and assign the same template it should create new
+ * json for that page. now it doesnt create any json." Each page gets
+ * its OWN independent row, keyed by its own page ID (hex_get_page_content()/
+ * hex_save_page_content() are always page-ID-scoped) — assigning the
+ * same template to a second page never shares or overwrites the
+ * first page's JSON.
+ *
+ * Fires on save_post_page (both the classic Page Attributes template
+ * dropdown and the block editor's sidebar template picker end up
+ * setting `_wp_page_template` via wp_insert_post()/wp_update_post()
+ * before save_post fires, for either editor) at priority 20 so the
+ * template meta is guaranteed already saved by the time this runs.
+ * Idempotent and safe to fire on every save: bails out immediately if
+ * the page already has ANY saved content, so it never overwrites an
+ * editor's own edits — it only ever fills a genuinely empty row once.
+ *
+ * @param int      $post_id The page's ID.
+ * @param \WP_Post $post    The page object.
+ * @return void
+ */
+function hexnity_wp_child_maybe_backfill_page_content( $post_id, $post ) {
+	if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
+
+	if ( ! isset( $post->post_type ) || 'page' !== $post->post_type || 'trash' === $post->post_status ) {
+		return;
+	}
+
+	if ( ! function_exists( 'hex_get_page_content' ) || ! function_exists( 'hex_save_page_content' ) ) {
+		return;
+	}
+
+	$template = get_page_template_slug( $post_id );
+	$defaults = hexnity_wp_child_get_template_defaults( $template );
+
+	if ( null === $defaults ) {
+		return;
+	}
+
+	$existing = hex_get_page_content( $post_id );
+
+	if ( ! empty( $existing ) ) {
+		return;
+	}
+
+	hex_save_page_content( $post_id, $defaults );
+}
+add_action( 'save_post_page', 'hexnity_wp_child_maybe_backfill_page_content', 20, 2 );

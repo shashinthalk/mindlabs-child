@@ -46,19 +46,32 @@ specific to the HTML→template workflow.
    directly in the template — with a `??` fallback equal to the
    original design's exact copy.
 9. **A template is not finished when the code is wired to the JSON
-   framework — it is only finished once that page's default JSON has
-   actually been saved to the database.** Wiring the template to
+   framework — it is only finished once its default JSON is saved to
+   the database for every Page that gets assigned it, including ones
+   that don't exist yet.** Wiring the template to
    `hex_get_page_content()`/`??` fallbacks makes the page *capable* of
    reading saved content; it does not itself put anything in the
-   `hex_page_content` table. Every time a template is created or
-   converted, immediately build the full default JSON payload (the
-   exact same values as the template's own fallbacks) and call
-   `hex_save_page_content( $page_id, $payload )` for the live Page(s)
-   already assigned that template, before considering the task done.
-   Do this again any time you discover the table is empty for a page
-   that should have content (e.g. the DB was reset) — it is not a
-   one-time step tied to the original conversion, it is a standing
-   invariant to check and restore whenever it's found missing.
+   `hex_page_content` table. **As of 2026-09-01 this is automatic**,
+   not a manual per-page step: `functions.php`'s
+   `hexnity_wp_child_get_template_defaults( $template_slug )` holds a
+   registry of every template's default payload (a straight
+   transcription of that template's own `??` fallback copy), and
+   `hexnity_wp_child_maybe_backfill_page_content()`, hooked to
+   `save_post_page`, calls `hex_save_page_content( $page_id, $defaults )`
+   the moment ANY Page — new or existing, this one or a different one
+   later assigned the same template — is saved with a registered
+   template and no content of its own yet. Each page gets its own
+   independent row; assigning the same template to a second page never
+   shares or overwrites the first page's JSON; re-saving an
+   already-backfilled page never overwrites an editor's own edits
+   (idempotent — it only ever fills a genuinely empty row).
+   **When adding a new template**, add its default payload to that
+   registry in the same task — this is now the mechanism, not an
+   optional extra. If a page's content is found missing anyway (e.g.
+   the DB was reset, or a page assigned a template that predates this
+   registry), the same standing-invariant discipline still applies:
+   check and restore it, manually via `hex_save_page_content()` if
+   needed, don't wait to be asked.
 10. **Every template calls `get_header()`/`get_footer()` — never renders
     its own inline header/footer markup.** As of 2026-08-30 this child
     theme has its own branded global header/footer (`header.php`/

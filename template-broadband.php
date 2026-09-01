@@ -38,9 +38,13 @@
  * not the Site Content header/footer store), `faq`
  * (heading/items[question,answer]).
  *
- * Step 9 (backfilling this page's default JSON into the
- * `hex_page_content` table) is deferred until a real Page in wp-admin
- * is assigned this template — no Page ID exists yet to backfill.
+ * Step 9 (backfilling a page's default JSON into the
+ * `hex_page_content` table): as of 2026-09-01 this happens
+ * automatically the moment a Page is assigned this template (see
+ * hexnity_wp_child_maybe_backfill_page_content() in functions.php) —
+ * no manual step needed, and no longer a one-time thing tied to
+ * Page ID 46 specifically; any new Page assigned this template gets
+ * its own independent JSON the same way.
  *
  * @package HexnityWPChild
  */

@@ -987,28 +987,14 @@
 	}
 
 	.site-logo {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
-		gap: 10px;
-		letter-spacing: -.01em;
 	}
 
-	.site-logo .logo-mark {
-		width: 26px;
-		height: 26px;
-		border-radius: 50%;
-		flex: 0 0 26px;
-		background: var(--hex-color-primary);
-		display: grid;
-		place-items: center;
-	}
-
-	footer .site-logo {
-		color: #fff;
-	}
-
-	footer .site-logo .logo-mark {
-		background: var(--hex-color-accent);
+	.site-logo-img {
+		display: block;
+		height: 32px;
+		width: auto;
 	}
 
 	.footer-grid .site-logo {
