@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.18.1' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.19.0' );
 
 /**
  * Registers this theme's custom-logo support so the WordPress core
@@ -770,3 +770,71 @@ function hexnity_wp_child_maybe_backfill_page_content( $post_id, $post ) {
 	hex_save_page_content( $post_id, $defaults );
 }
 add_action( 'save_post_page', 'hexnity_wp_child_maybe_backfill_page_content', 20, 2 );
+
+/**
+ * Backfills default Header/Footer Site Content JSON the first time
+ * this theme's code runs in wp-admin on a site where those rows don't
+ * exist yet -- e.g. right after a fresh install, or right after this
+ * theme is updated (via the GitHub updater) on a site whose "Header &
+ * Footer" admin page has never been saved. Added 2026-09-01 per
+ * explicit user need: a theme code update only ships files, never
+ * database content -- this theme is deployed to more than one site,
+ * and a brand-new/never-configured site would otherwise show a blank
+ * Header & Footer JSON until someone manually typed values in. This
+ * makes the same non-empty defaults this theme originally shipped
+ * with (matching site-header.php's/site-footer.php's own hardcoded
+ * `??` fallback copy) appear automatically -- the same idempotent
+ * "fill only if truly empty, never overwrite" pattern
+ * hexnity_wp_child_maybe_backfill_page_content() above already uses
+ * for per-page content.
+ *
+ * Deliberately does NOT set logo_url/logo_alt here: leaving those
+ * unset is what lets hexnity_wp_child_get_site_logo() fall through to
+ * the site's own Customizer "Site Identity" logo automatically (see
+ * that function, above). Only set logo_url explicitly, via the admin
+ * page, when a section genuinely needs an image different from the
+ * site's single Customizer logo -- an image file is inherently a
+ * per-site editorial choice this function cannot invent on its own.
+ *
+ * Also deliberately leaves the footer's `columns`/`bottom_links` keys
+ * out of the backfilled payload: site-footer.php already has its own
+ * full structural `?? array(...)` fallback for those, so an absent
+ * key there already renders the original 3-column design -- writing
+ * them here too would just duplicate that default in two places.
+ *
+ * @return void
+ */
+function hexnity_wp_child_maybe_backfill_site_content() {
+	if ( ! function_exists( 'hex_get_site_content' ) || ! function_exists( 'hex_save_site_content' ) ) {
+		return;
+	}
+
+	if ( empty( hex_get_site_content( 'header' ) ) ) {
+		hex_save_site_content(
+			'header',
+			array(
+				'brand_name'      => 'Mindlabz',
+				'phone'           => '1300 110 829',
+				'cta_label'       => 'Book a consultation',
+				'cta_label_short' => 'Enquire',
+				'cta_url'         => '#contact',
+				'skip_link_text'  => 'Skip to content',
+			)
+		);
+	}
+
+	if ( empty( hex_get_site_content( 'footer' ) ) ) {
+		hex_save_site_content(
+			'footer',
+			array(
+				'brand_name' => 'Mindlabz',
+				'blurb'      => 'Sales technology and managed acquisition for Australian energy, telecom, insurance and finance brands.',
+				'phone'      => '1300 110 829',
+				'email'      => 'info@mindlabz.com.au',
+				'abn'        => 'ABN 00 000 000 000',
+				'address'    => '10.1, 3 Bowen Crescent, Melbourne VIC 3004',
+			)
+		);
+	}
+}
+add_action( 'admin_init', 'hexnity_wp_child_maybe_backfill_site_content' );

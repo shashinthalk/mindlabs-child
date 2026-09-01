@@ -97,6 +97,22 @@ directory, before touching anything else.
     longer need to know or check whether a Page is already assigned;
     the hook handles that whenever a Page (existing or future) picks
     up that template.
+  - **Site Content backfill (header/footer) is now code-automated too**
+    (added 2026-09-01, per explicit user question about how a live-site
+    theme update via the GitHub updater could ever create Site Content
+    JSON automatically, since a code update alone never touches a
+    site's database): `functions.php`'s
+    `hexnity_wp_child_maybe_backfill_site_content()`, hooked to
+    `admin_init`, calls `hex_save_site_content()` itself for `header`
+    and/or `footer` the moment either section is genuinely empty on
+    whatever site this code is running on — a fresh install, or a site
+    whose "Header & Footer" admin page has never been saved. Idempotent
+    and safe on every admin request: never overwrites content that's
+    already there. Deliberately excludes `logo_url`/`logo_alt` (left
+    unset so `hexnity_wp_child_get_site_logo()`'s Customizer-logo
+    fallback applies on every site automatically) and the footer's
+    `columns`/`bottom_links` (already covered by `site-footer.php`'s
+    own PHP-level fallback array). See `GUIDELINES.md` §9.
   - If a template genuinely has no registry entry yet (an oversight,
     or a template that predates this mechanism), note that clearly as
     an open item so it isn't forgotten — but don't block the rest of

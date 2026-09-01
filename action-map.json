@@ -536,6 +536,18 @@
         "Site Content DB row: header (reverted manual logo_url/logo_alt)",
         "Site Content DB row: footer (reverted manual logo_url/logo_alt)"
       ]
+    },
+    {
+      "date": "2026-09-01",
+      "user_requirement": "User attempted to add logo_url to the live site's Header JSON by hand, submitted invalid JSON (trailing comma) plus a literal placeholder URL, and the save was silently rejected (reverted to prior content, per the existing \"invalid JSON leaves previous content untouched\" behavior) -- user experienced this as the value \"disappearing\". Also asked for two different logos (header vs footer), then asked the core question: when the live site's theme is updated via GitHub, how do these JSON values get created, and how can that happen automatically instead of by hand.",
+      "action": "Fixed the immediate local-DB break (invalid JSON / placeholder) by writing a valid header+footer payload with the real local attachment-15 logo URL via hex_save_site_content() (same image used for both sections, since no second/white logo file exists yet in the local Media Library -- flagged to user that a real second file is needed for the footer to look genuinely different). Then addressed the real ask: added hexnity_wp_child_maybe_backfill_site_content() to functions.php (admin_init hook), the Site Content equivalent of the already-existing hexnity_wp_child_maybe_backfill_page_content() Page Content mechanism -- idempotent, only writes this theme's original default header/footer copy when that section's Site Content is genuinely empty (fresh site, or a site whose admin page was never saved), never overwrites real content. This means a theme code update (via the GitHub updater) now creates sane default JSON automatically on any site that needs it, with zero manual JSON typing or per-site DB script -- verified locally by emptying both sections, confirming the function backfills them correctly, then restoring this site's real saved content afterward.",
+      "files_touched": [
+        "functions.php",
+        "project.json",
+        "style.css",
+        "Site Content DB row: header (fixed invalid save, tested empty-state backfill, restored)",
+        "Site Content DB row: footer (fixed invalid save, tested empty-state backfill, restored)"
+      ]
     }
   ]
 }

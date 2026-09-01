@@ -326,11 +326,26 @@ the parent's neutral ones:
   unrelated to the header/footer.
 - See the parent's `features/header-footer-content.md` and
   `inc/site-content.php` for the full framework architecture.
-- **DB backfill status (per TEMPLATE-CONVERSION-GUIDE.md §9's same
-  invariant, applied here to site-wide chrome rather than one page):**
-  both `header` and `footer` Site Content JSON rows were saved
-  2026-08-30 (matching the fallback defaults above exactly — nothing
-  visually changed). The "primary" WP nav menu was also backfilled the
+- **DB backfill is now code-automated (added 2026-09-01), the same way
+  Page Content backfill is** — `functions.php`'s
+  `hexnity_wp_child_maybe_backfill_site_content()`, hooked to
+  `admin_init`, fills the `header`/`footer` Site Content JSON with
+  this theme's original default copy (the same values below)
+  automatically the moment this theme's code runs in wp-admin on any
+  site where that section is still empty — a fresh install, or a site
+  whose "Header & Footer" admin page has never been saved. It never
+  overwrites content that's already there. This matters because this
+  theme ships to more than one site via its own GitHub updater: a code
+  update alone can never create database content on its own (that's
+  per-site data), so before this existed, every new site needed the
+  same manual DB backfill repeated for it by hand. It deliberately
+  does not backfill `logo_url`/`logo_alt` (left unset so
+  `hexnity_wp_child_get_site_logo()`'s Customizer fallback applies) or
+  the footer's `columns`/`bottom_links` (already covered by
+  `site-footer.php`'s own PHP-level fallback array).
+  **This site's own rows** were first saved manually 2026-08-30
+  (matching the fallback defaults above exactly — nothing visually
+  changed). The "primary" WP nav menu was also backfilled the
   same day with the 5 original in-page anchor links (Services/AI &
   Technology/Our Brands/Results/Contact) — it had previously held only
   a single placeholder "Home" item. **Updated again the same day**,
