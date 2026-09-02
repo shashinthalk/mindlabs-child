@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.19.0' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.20.0' );
 
 /**
  * Registers this theme's custom-logo support so the WordPress core
@@ -549,8 +549,8 @@ function hexnity_wp_child_get_template_defaults( $template_slug ) {
 					),
 				),
 				'logo_strip' => array(
-					'label' => 'Trusted across energy, telecom & insurance',
-					'names' => array( 'Origin', 'AGL', 'EnergyAustralia', 'Momentum', 'Sumo', 'OVO Energy', '1st Energy', 'Nectr', 'Aussie Broadband', 'Next Business Energy' ),
+					'label'     => 'Trusted across energy, telecom & insurance',
+					'shortcode' => '[hex_partner_logos]',
 				),
 				'services' => array(
 					'eyebrow' => 'What we do',
@@ -655,7 +655,6 @@ function hexnity_wp_child_get_template_defaults( $template_slug ) {
 							'link_label' => 'Visit Compare Your Bills',
 							'url'        => '#',
 							'domain'     => 'compareyourbills.com.au',
-							'rating'     => '★★★★★',
 						),
 						array(
 							'tag'        => 'Consumer · Bill review',
@@ -664,7 +663,6 @@ function hexnity_wp_child_get_template_defaults( $template_slug ) {
 							'link_label' => 'Visit Check Your Bill',
 							'url'        => '#',
 							'domain'     => 'checkyourbill.com.au',
-							'rating'     => '★★★★★',
 						),
 					),
 				),
@@ -673,9 +671,10 @@ function hexnity_wp_child_get_template_defaults( $template_slug ) {
 					'attribution' => 'Rizwan Saeed · Compare Your Bills customer',
 				),
 				'compliance' => array(
-					'heading' => 'ISO/IEC 27001:2022 certified since 2022',
-					'text'    => 'Certified information security management, independently accredited. Every consumer interaction is consented, recorded and auditable — the standard energy and telco retailers are contractually required to hold their partners to.',
-					'badges'  => array( 'ISO/IEC 27001:2022', 'IAS / IAF accredited', 'Consent-based data only' ),
+					'heading'    => 'ISO/IEC 27001:2022 certified since 2022',
+					'text'       => 'Certified information security management, independently accredited. Every consumer interaction is consented, recorded and auditable — the standard energy and telco retailers are contractually required to hold their partners to.',
+					'image_url'  => get_stylesheet_directory_uri() . '/assets/images/compliance-badges-placeholder.svg',
+					'image_alt'  => 'ISO/IEC 27001:2022 · IAS/IAF accredited · Consent-based data only',
 				),
 				'paths' => array(
 					array(
@@ -770,6 +769,127 @@ function hexnity_wp_child_maybe_backfill_page_content( $post_id, $post ) {
 	hex_save_page_content( $post_id, $defaults );
 }
 add_action( 'save_post_page', 'hexnity_wp_child_maybe_backfill_page_content', 20, 2 );
+
+/**
+ * Applies this theme's known template-home.php Page Content field
+ * migrations to one page's ALREADY-SAVED JSON, without touching
+ * anything else an editor has customized. Added 2026-09-02 per
+ * explicit user instruction after a Home page redesign (logo strip
+ * names → a `[hex_partner_logos]` shortcode slot, compliance text
+ * badges → a single image, brand-card star ratings removed): the user
+ * had already hand-edited that page's live Page Content JSON and was
+ * explicit that a resync must NOT blow away those edits — "it should
+ * update what I asked, because in the live site I changed the json
+ * data. so it should not be replaced" — so this only ever touches the
+ * three specific sub-keys this migration concerns, via hex_get_page_content()
+ * as the base (never a full array_replace over the whole payload,
+ * which would risk duplicating the numerically-keyed `cards` array or
+ * clobbering unrelated fields).
+ *
+ * Deliberately narrow and hand-written per migration, not a generic
+ * "reset to defaults" — a blind merge of hexnity_wp_child_get_template_defaults()
+ * over live content would silently overwrite any other copy an editor
+ * has already customized (headings, ledes, CTAs, etc.), which is
+ * exactly what this feature exists to avoid.
+ *
+ * @param int $post_id The page's ID.
+ * @return bool Whether hex_save_page_content() reported success.
+ */
+function hexnity_wp_child_sync_home_page_content_migrations( $post_id ) {
+	if ( ! function_exists( 'hex_get_page_content' ) || ! function_exists( 'hex_save_page_content' ) ) {
+		return false;
+	}
+
+	$content = hex_get_page_content( $post_id );
+
+	if ( empty( $content['logo_strip']['shortcode'] ) ) {
+		$content['logo_strip']['shortcode'] = '[hex_partner_logos]';
+	}
+	unset( $content['logo_strip']['names'] );
+
+	if ( empty( $content['compliance']['image_url'] ) ) {
+		$content['compliance']['image_url'] = get_stylesheet_directory_uri() . '/assets/images/compliance-badges-placeholder.svg';
+	}
+	if ( empty( $content['compliance']['image_alt'] ) ) {
+		$content['compliance']['image_alt'] = 'ISO/IEC 27001:2022 · IAS/IAF accredited · Consent-based data only';
+	}
+	unset( $content['compliance']['badges'] );
+
+	if ( ! empty( $content['brands']['cards'] ) && is_array( $content['brands']['cards'] ) ) {
+		foreach ( $content['brands']['cards'] as &$card ) {
+			unset( $card['rating'] );
+		}
+		unset( $card );
+	}
+
+	return (bool) hex_save_page_content( $post_id, $content );
+}
+
+/**
+ * Renders a small "Sync template updates" meta box on the Edit Page
+ * screen, only for a page currently assigned template-home.php — a
+ * one-click button that runs hexnity_wp_child_sync_home_page_content_migrations()
+ * so the 2026-09-02 field changes above reach a page's already-saved
+ * JSON (the automatic hexnity_wp_child_maybe_backfill_page_content()
+ * hook only ever fills a genuinely EMPTY row, by design — it never
+ * touches a page that already has content, which this page does).
+ */
+function hexnity_wp_child_register_sync_meta_box() {
+	add_meta_box(
+		'hexnity_wp_child_sync_home_defaults',
+		'Sync Template Updates',
+		'hexnity_wp_child_render_sync_meta_box',
+		'page',
+		'side',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes_page', 'hexnity_wp_child_register_sync_meta_box' );
+
+function hexnity_wp_child_render_sync_meta_box( $post ) {
+	if ( 'template-home.php' !== get_page_template_slug( $post->ID ) ) {
+		echo '<p style="color:#666;">No pending template updates for this page.</p>';
+		return;
+	}
+
+	if ( isset( $_GET['hexnity_synced'] ) && '1' === $_GET['hexnity_synced'] ) {
+		echo '<p style="color:#1a7f37;">Synced.</p>';
+	}
+
+	wp_nonce_field( 'hexnity_wp_child_sync_home_defaults_' . $post->ID, 'hexnity_wp_child_sync_nonce' );
+	?>
+	<p style="margin-top:0;">Pulls in the latest Home template field changes (logo strip shortcode, compliance image, brand card ratings) without touching any other content you've already customized on this page.</p>
+	<button type="submit" name="hexnity_wp_child_sync_home_defaults" value="1" class="button button-secondary">Sync now</button>
+	<?php
+}
+
+/**
+ * Handles the "Sync now" button above: runs on the normal Page save
+ * request (same nonce, same form submit) rather than a separate
+ * admin-post.php action, so it can't run without also going through
+ * WordPress's own Page save/permission flow.
+ */
+function hexnity_wp_child_maybe_handle_sync_button( $post_id ) {
+	if ( empty( $_POST['hexnity_wp_child_sync_home_defaults'] ) ) {
+		return;
+	}
+
+	if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
+
+	if ( ! isset( $_POST['hexnity_wp_child_sync_nonce'] ) ||
+		! wp_verify_nonce( wp_unslash( $_POST['hexnity_wp_child_sync_nonce'] ), 'hexnity_wp_child_sync_home_defaults_' . $post_id ) ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	hexnity_wp_child_sync_home_page_content_migrations( $post_id );
+}
+add_action( 'save_post_page', 'hexnity_wp_child_maybe_handle_sync_button', 20 );
 
 /**
  * Backfills default Header/Footer Site Content JSON the first time

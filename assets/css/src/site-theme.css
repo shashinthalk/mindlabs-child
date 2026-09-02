@@ -1485,6 +1485,13 @@
 		flex-wrap: wrap;
 	}
 
+	.compliance-badges-img {
+		max-width: 260px;
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+
 	/* Two paths split. */
 	.paths-split {
 		display: grid;

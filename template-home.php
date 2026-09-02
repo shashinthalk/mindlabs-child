@@ -59,10 +59,7 @@ get_header();
 
 $content = function_exists( 'hex_get_page_content' ) ? hex_get_page_content() : array();
 
-$logo_strip_names = $content['logo_strip']['names'] ?? array(
-	'Origin', 'AGL', 'EnergyAustralia', 'Momentum', 'Sumo',
-	'OVO Energy', '1st Energy', 'Nectr', 'Aussie Broadband', 'Next Business Energy',
-);
+$logo_strip_shortcode = $content['logo_strip']['shortcode'] ?? '[hex_partner_logos]';
 
 $service_rows = $content['services']['rows'] ?? array(
 	array(
@@ -118,7 +115,6 @@ $brand_cards = $content['brands']['cards'] ?? array(
 		'link_label' => 'Visit Compare Your Bills',
 		'url'        => '#',
 		'domain'     => 'compareyourbills.com.au',
-		'rating'     => '★★★★★',
 	),
 	array(
 		'tag'        => 'Consumer · Bill review',
@@ -127,13 +123,11 @@ $brand_cards = $content['brands']['cards'] ?? array(
 		'link_label' => 'Visit Check Your Bill',
 		'url'        => '#',
 		'domain'     => 'checkyourbill.com.au',
-		'rating'     => '★★★★★',
 	),
 );
 
-$compliance_badges = $content['compliance']['badges'] ?? array(
-	'ISO/IEC 27001:2022', 'IAS / IAF accredited', 'Consent-based data only',
-);
+$compliance_image_url = $content['compliance']['image_url'] ?? ( get_stylesheet_directory_uri() . '/assets/images/compliance-badges-placeholder.svg' );
+$compliance_image_alt = $content['compliance']['image_alt'] ?? 'ISO/IEC 27001:2022 · IAS/IAF accredited · Consent-based data only';
 
 $paths = $content['paths'] ?? array(
 	array(
@@ -194,11 +188,7 @@ $contact_form_options = $content['contact']['form_options'] ?? array(
   <div class="logo-strip">
     <div class="hex-container">
       <span class="logo-strip-label hex-h5 font-mono"><?php echo esc_html( $content['logo_strip']['label'] ?? 'Trusted across energy, telecom & insurance' ); ?></span>
-      <div class="logo-strip-names hex-small">
-        <?php foreach ( $logo_strip_names as $name ) : ?>
-        <span><?php echo esc_html( $name ); ?></span>
-        <?php endforeach; ?>
-      </div>
+      <div class="logo-strip-names hex-small"><?php echo do_shortcode( $logo_strip_shortcode ); ?></div>
     </div>
   </div>
 </div>
@@ -279,7 +269,7 @@ $contact_form_options = $content['contact']['form_options'] ?? array(
         <h3 class="hex-h3"><?php echo esc_html( $card['title'] ?? '' ); ?></h3>
         <p><?php echo esc_html( $card['desc'] ?? '' ); ?></p>
         <a class="link-arrow" href="<?php echo esc_url( $card['url'] ?? '#' ); ?>"><?php echo esc_html( $card['link_label'] ?? '' ); ?> <svg class="icon icon-sm" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <div class="brand-foot"><small class="hex-h5 font-mono"><?php echo esc_html( $card['domain'] ?? '' ); ?></small><small class="hex-h5 font-mono"><?php echo esc_html( $card['rating'] ?? '' ); ?></small></div>
+        <div class="brand-foot"><small class="hex-h5 font-mono"><?php echo esc_html( $card['domain'] ?? '' ); ?></small></div>
       </div>
       <?php endforeach; ?>
     </div>
@@ -303,9 +293,7 @@ $contact_form_options = $content['contact']['form_options'] ?? array(
         <p><?php echo esc_html( $content['compliance']['text'] ?? 'Certified information security management, independently accredited. Every consumer interaction is consented, recorded and auditable — the standard energy and telco retailers are contractually required to hold their partners to.' ); ?></p>
       </div>
       <div class="badge-row">
-        <?php foreach ( $compliance_badges as $badge ) : ?>
-        <span class="badge badge-mono hex-h5 font-mono"><?php echo esc_html( $badge ); ?></span>
-        <?php endforeach; ?>
+        <img class="compliance-badges-img" src="<?php echo esc_url( $compliance_image_url ); ?>" alt="<?php echo esc_attr( $compliance_image_alt ); ?>">
       </div>
     </div>
   </div>

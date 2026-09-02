@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 72" role="img" aria-labelledby="complianceBadgesTitle">
+	<title id="complianceBadgesTitle">Compliance accreditation badges</title>
+	<rect x="1" y="1" width="318" height="70" rx="10" fill="none" stroke="#C9CDD3" stroke-width="1.5" stroke-dasharray="4 4"/>
+	<text x="160" y="32" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" letter-spacing=".04em" fill="#8A8F98">COMPLIANCE BADGES</text>
+	<text x="160" y="50" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#B0B4BB">ISO/IEC 27001 · IAS/IAF · Consent-based</text>
+</svg>
