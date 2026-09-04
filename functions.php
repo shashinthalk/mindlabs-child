@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.20.3' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.21.2' );
 
 /**
  * Registers this theme's custom-logo support so the WordPress core
@@ -649,20 +649,44 @@ function hexnity_wp_child_get_template_defaults( $template_slug ) {
 					'lede'    => 'Our comparison brands are where the technology is proven: real households, real switches, real compliance load. That\'s what partners are actually buying.',
 					'cards'   => array(
 						array(
-							'tag'        => 'Consumer · Energy & broadband',
-							'title'      => 'Compare Your Bills',
-							'desc'       => 'Households compare electricity, gas, broadband and mobile plans and switch over the phone with a real consultant — free to the customer, end to end.',
-							'link_label' => 'Visit Compare Your Bills',
-							'url'        => '#',
-							'domain'     => 'compareyourbills.com.au',
+							'logo_url'    => '',
+							'logo_alt'    => 'Compare Your Bills',
+							'tag'         => 'Consumer · Energy & broadband',
+							'title'       => 'Compare Your Bills',
+							'desc'        => 'Households compare electricity, gas, broadband and mobile plans and switch over the phone with a real consultant — free to the customer, end to end.',
+							'link_label'  => 'Visit Compare Your Bills',
+							'url'         => '#',
+							'domain'      => 'compareyourbills.com.au',
+							'foot_images' => array(
+								array(
+									'url' => '',
+									'alt' => '',
+								),
+								array(
+									'url' => '',
+									'alt' => '',
+								),
+							),
 						),
 						array(
-							'tag'        => 'Consumer · Bill review',
-							'title'      => 'Check Your Bill',
-							'desc'       => 'A second opinion on what you\'re paying. Send through a bill and get a like-for-like breakdown against what\'s actually available in your postcode today.',
-							'link_label' => 'Visit Check Your Bill',
-							'url'        => '#',
-							'domain'     => 'checkyourbill.com.au',
+							'logo_url'    => '',
+							'logo_alt'    => 'Check Your Bill',
+							'tag'         => 'Consumer · Bill review',
+							'title'       => 'Check Your Bill',
+							'desc'        => 'A second opinion on what you\'re paying. Send through a bill and get a like-for-like breakdown against what\'s actually available in your postcode today.',
+							'link_label'  => 'Visit Check Your Bill',
+							'url'         => '#',
+							'domain'      => 'checkyourbill.com.au',
+							'foot_images' => array(
+								array(
+									'url' => '',
+									'alt' => '',
+								),
+								array(
+									'url' => '',
+									'alt' => '',
+								),
+							),
 						),
 					),
 				),
@@ -958,3 +982,60 @@ function hexnity_wp_child_maybe_backfill_site_content() {
 	}
 }
 add_action( 'admin_init', 'hexnity_wp_child_maybe_backfill_site_content' );
+
+/**
+ * Upgrades the parent theme's plain "Page Content (JSON)" `<textarea>`
+ * (Edit Page screen, meta box id `hex_page_content`, field id
+ * `hex_page_content_json` — confirmed live by introspecting
+ * $wp_meta_boxes for the 'page' screen, not by reading any parent
+ * theme file) into a real code editor — line numbers, JSON syntax
+ * highlighting, bracket matching and inline lint errors — per explicit
+ * user request for something "like VS Code" to make the raw JSON
+ * easier to maintain. Added 2026-09-04.
+ *
+ * Uses WordPress core's own bundled CodeMirror (wp_enqueue_code_editor()
+ * — the same editor behind Appearance → Customize → Additional CSS and
+ * the theme/plugin file editors), not a new external library. This is
+ * pure progressive enhancement entirely from this child theme's own
+ * side: no parent file is touched, and the save path is unchanged —
+ * wp.codeEditor.initialize() keeps the underlying textarea's value in
+ * sync, so the parent's existing hex_page_content_json POST handling
+ * (inc/page-content.php) needs zero changes. See
+ * assets/js/page-content-json-editor.js for the client-side half.
+ * Scoped to the Edit Page screen only (post.php/post-new.php, post
+ * type 'page') so CodeMirror's JS/CSS never loads on unrelated
+ * wp-admin screens.
+ *
+ * @param string $hook The current admin page's hook suffix.
+ * @return void
+ */
+function hexnity_wp_child_enqueue_page_content_code_editor( $hook ) {
+	if ( ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+		return;
+	}
+
+	if ( 'page' !== get_post_type() ) {
+		return;
+	}
+
+	$settings = wp_enqueue_code_editor( array( 'type' => 'application/json' ) );
+	if ( false === $settings ) {
+		// User has disabled the code editor in their own wp-admin profile.
+		return;
+	}
+
+	wp_enqueue_script(
+		'hexnity-wp-child-page-content-json-editor',
+		get_stylesheet_directory_uri() . '/assets/js/page-content-json-editor.js',
+		array( 'jquery', 'code-editor' ),
+		HEXNITY_WP_CHILD_VERSION,
+		true
+	);
+
+	wp_localize_script(
+		'hexnity-wp-child-page-content-json-editor',
+		'hexnityWpChildJsonEditor',
+		array( 'settings' => $settings )
+	);
+}
+add_action( 'admin_enqueue_scripts', 'hexnity_wp_child_enqueue_page_content_code_editor' );

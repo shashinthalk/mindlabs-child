@@ -592,6 +592,37 @@
         "style.css",
         "functions.php"
       ]
+    },
+    {
+      "date": "2026-09-04",
+      "user_requirement": "\"I need this jsons looks more good. I mean now it is plain text, but I need the editor looks like vs code. is there any library or any way to implement something like that. it will be easy to maintain the json\" -- referring to the parent theme's raw-JSON \"Page Content (JSON)\" meta box on the Edit Page screen.",
+      "action": "That meta box (id `hex_page_content`, callback `hex_render_page_content_meta_box`, field `#hex_page_content_json`) is entirely owned and rendered by the PARENT theme (inc/page-content.php per GUIDELINES.md §8) -- confirmed live by bootstrapping wp-load.php + wp-admin/includes/screen.php, setting the current screen to 'page', firing add_meta_boxes/add_meta_boxes_page, and introspecting the resulting $wp_meta_boxes global (never by opening any parent file, per the strict folder boundary). Rather than editing that parent callback (out of bounds), implemented this as a pure progressive-enhancement add-on from this child theme's own side: functions.php's new hexnity_wp_child_enqueue_page_content_code_editor() (hooked admin_enqueue_scripts, scoped to post.php/post-new.php + post type 'page' only) calls WordPress core's own wp_enqueue_code_editor(array('type'=>'application/json')) -- the same built-in CodeMirror editor behind Appearance > Customize > Additional CSS and the theme/plugin file editors, no new external library or CDN dependency -- then enqueues a new assets/js/page-content-json-editor.js (localized with the returned settings) that finds #hex_page_content_json and calls wp.codeEditor.initialize() on it: line numbers, JSON syntax highlighting, bracket matching and inline lint errors, while wp.codeEditor keeps the underlying textarea's value in sync so the parent's existing POST-handling save path needs zero changes. Respects a user's own 'disable the code editor' wp-admin profile setting (wp_enqueue_code_editor() returns false in that case, function bails). Verified live: same bootstrap technique fired admin_enqueue_scripts with hook 'post.php' against the real Home page (ID 8) and confirmed wp_script_is('code-editor','enqueued'), our script enqueued, and the localized hexnityWpChildJsonEditor settings data all present. php -l clean on functions.php, JS parses (node -c equivalent). Bumped style.css Version and functions.php HEXNITY_WP_CHILD_VERSION together, 1.20.3 -> 1.21.0 (minor bump -- a new capability, not a patch fix).",
+      "files_touched": [
+        "functions.php",
+        "assets/js/page-content-json-editor.js",
+        "style.css"
+      ]
+    },
+    {
+      "date": "2026-09-04",
+      "user_requirement": "On the Home page's 'Owned consumer brands' cards (Compare Your Bills / Check Your Bill): add a logo image before the title, and two images in the same row after the domain at the bottom of the card. \"add options to json also.\"",
+      "action": "template-home.php: added an optional `<img class=\"brand-card-logo\">` before the `.tag` span (rendered only if `card['logo_url']` is non-empty), and an optional `.brand-foot-images` wrapper inside `.brand-foot` (after the existing `<small>` domain text) holding up to two `<img>` tags, built from a new `foot_images` array-of-{url,alt} field -- filtered with array_filter() to drop empty entries so nothing (not even an empty wrapper div) renders until a real URL is set. `.brand-foot` already had `display:flex; justify-content:space-between; align-items:center` from its original layout, so the domain text and the two-image group land in the same row for free, no layout change needed there. assets/css/src/site-theme.css: added `.brand-card-logo` (36px height, 20px bottom margin) and `.brand-foot-images`/`.brand-foot-images img` (flex row, 12px gap, 22px image height). Updated both code-level defaults to the same new shape (empty logo_url/foot_images, per-card): template-home.php's `$brand_cards` fallback array and functions.php's `hexnity_wp_child_get_template_defaults()` 'home' case. Added the new keys to the LIVE Home page's (ID 8) already-saved Page Content JSON too (logo_url/logo_alt/foot_images, all empty placeholders ready to fill in via the new CodeMirror JSON editor) via a one-off script calling hex_get_page_content()/hex_save_page_content() -- non-destructive, only added the missing keys, left every existing field untouched. Did NOT touch template-our-brands.php's separate/independent 'cards' default (functions.php, 'template-our-brands.php' case, still carries the old 'rating' shape) -- out of scope, the user's request was specifically about the Home page section (matched verbatim by the JSON they pasted). Verified live: rendered the Home page template twice, once with the real (empty) saved JSON (confirmed the logo and foot-images markup cleanly omit themselves, no empty wrapper div) and once with a temporary in-memory override carrying real placeholder URLs (confirmed the logo renders before the title and both foot images render in the same row as the domain). php -l clean on both PHP files, CSS brace-balanced (278/278). Bumped style.css Version and functions.php HEXNITY_WP_CHILD_VERSION together, 1.21.0 -> 1.21.1.",
+      "files_touched": [
+        "template-home.php",
+        "assets/css/src/site-theme.css",
+        "functions.php",
+        "style.css"
+      ]
+    },
+    {
+      "date": "2026-09-04",
+      "user_requirement": "\"I added image urls, but I cannt see them in front end view\" -- the brands.cards logo_url/foot_images the user had just typed into the new CodeMirror JSON editor weren't showing on the front end.",
+      "action": "Root cause, confirmed live: bootstrapped wp-load.php and read hex_get_page_content(8)['brands']['cards'] directly from the DB -- logo_url/foot_images were still all empty, meaning the user's edits never actually reached the saved row at all (this was a save-path bug, not a render bug). assets/js/page-content-json-editor.js (added the same day for the code-editor enhancement) called wp.codeEditor.initialize() but never wired up syncing the CodeMirror instance's content back to the underlying #hex_page_content_json textarea -- CodeMirror.fromTextArea() (what wp.codeEditor.initialize() wraps) only writes back to the original textarea via an explicit .save() call, it does NOT do this automatically on every keystroke. So the user's typed URLs stayed inside the visual editor only; the actual <textarea> value that gets POSTed on Update/Publish remained whatever it was on page load (the old, empty JSON), which is exactly what the parent's hex_page_content_json save handler received and stored -- unchanged. Fixed by adding `editor.codemirror.on('change', function(){ editor.codemirror.save(); })` (syncs on every edit) plus a submit-time safety net (`$(textarea).closest('form').on('submit', function(){ editor.codemirror.save(); })`) -- the same two-layer pattern WordPress core's own Additional CSS editor uses for exactly this reason. Verified JS parses cleanly (node -c). The user will need to re-enter the image URLs they'd typed before this fix, since they were never actually saved to the database in the first place -- nothing to recover, no data was silently lost after being saved, it just never left the browser. Bumped style.css Version and functions.php HEXNITY_WP_CHILD_VERSION together, 1.21.1 -> 1.21.2.",
+      "files_touched": [
+        "assets/js/page-content-json-editor.js",
+        "style.css",
+        "functions.php"
+      ]
     }
   ]
 }

@@ -109,20 +109,32 @@ $result_stats = $content['results']['stats'] ?? array(
 
 $brand_cards = $content['brands']['cards'] ?? array(
 	array(
-		'tag'        => 'Consumer · Energy & broadband',
-		'title'      => 'Compare Your Bills',
-		'desc'       => 'Households compare electricity, gas, broadband and mobile plans and switch over the phone with a real consultant — free to the customer, end to end.',
-		'link_label' => 'Visit Compare Your Bills',
-		'url'        => '#',
-		'domain'     => 'compareyourbills.com.au',
+		'logo_url'    => '',
+		'logo_alt'    => 'Compare Your Bills',
+		'tag'         => 'Consumer · Energy & broadband',
+		'title'       => 'Compare Your Bills',
+		'desc'        => 'Households compare electricity, gas, broadband and mobile plans and switch over the phone with a real consultant — free to the customer, end to end.',
+		'link_label'  => 'Visit Compare Your Bills',
+		'url'         => '#',
+		'domain'      => 'compareyourbills.com.au',
+		'foot_images' => array(
+			array( 'url' => '', 'alt' => '' ),
+			array( 'url' => '', 'alt' => '' ),
+		),
 	),
 	array(
-		'tag'        => 'Consumer · Bill review',
-		'title'      => 'Check Your Bill',
-		'desc'       => "A second opinion on what you're paying. Send through a bill and get a like-for-like breakdown against what's actually available in your postcode today.",
-		'link_label' => 'Visit Check Your Bill',
-		'url'        => '#',
-		'domain'     => 'checkyourbill.com.au',
+		'logo_url'    => '',
+		'logo_alt'    => 'Check Your Bill',
+		'tag'         => 'Consumer · Bill review',
+		'title'       => 'Check Your Bill',
+		'desc'        => "A second opinion on what you're paying. Send through a bill and get a like-for-like breakdown against what's actually available in your postcode today.",
+		'link_label'  => 'Visit Check Your Bill',
+		'url'         => '#',
+		'domain'      => 'checkyourbill.com.au',
+		'foot_images' => array(
+			array( 'url' => '', 'alt' => '' ),
+			array( 'url' => '', 'alt' => '' ),
+		),
 	),
 );
 
@@ -265,11 +277,31 @@ $contact_form_options = $content['contact']['form_options'] ?? array(
     <div class="brand-grid">
       <?php foreach ( $brand_cards as $card ) : ?>
       <div class="brand-card card hex-small">
+        <?php if ( ! empty( $card['logo_url'] ) ) : ?>
+        <img class="brand-card-logo" src="<?php echo esc_url( $card['logo_url'] ); ?>" alt="<?php echo esc_attr( $card['logo_alt'] ?? $card['title'] ?? '' ); ?>">
+        <?php endif; ?>
         <span class="tag hex-h5 font-mono"><?php echo esc_html( $card['tag'] ?? '' ); ?></span>
         <h3 class="hex-h3"><?php echo esc_html( $card['title'] ?? '' ); ?></h3>
         <p><?php echo esc_html( $card['desc'] ?? '' ); ?></p>
         <a class="link-arrow" href="<?php echo esc_url( $card['url'] ?? '#' ); ?>"><?php echo esc_html( $card['link_label'] ?? '' ); ?> <svg class="icon icon-sm" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-        <div class="brand-foot"><small class="hex-h5 font-mono"><?php echo esc_html( $card['domain'] ?? '' ); ?></small></div>
+        <?php
+        $foot_images = array_filter(
+			$card['foot_images'] ?? array(),
+			function ( $foot_image ) {
+				return ! empty( $foot_image['url'] );
+			}
+		);
+        ?>
+        <div class="brand-foot">
+          <small class="hex-h5 font-mono"><?php echo esc_html( $card['domain'] ?? '' ); ?></small>
+          <?php if ( ! empty( $foot_images ) ) : ?>
+          <div class="brand-foot-images">
+            <?php foreach ( $foot_images as $foot_image ) : ?>
+            <img src="<?php echo esc_url( $foot_image['url'] ); ?>" alt="<?php echo esc_attr( $foot_image['alt'] ?? '' ); ?>">
+            <?php endforeach; ?>
+          </div>
+          <?php endif; ?>
+        </div>
       </div>
       <?php endforeach; ?>
     </div>
