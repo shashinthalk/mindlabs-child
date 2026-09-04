@@ -561,6 +561,37 @@
         "style.css",
         "project.json"
       ]
+    },
+    {
+      "date": "2026-09-04",
+      "user_requirement": "Two Home-page fixes: (1) user reported no place in the Page Content (JSON) meta box to edit the `[hex_partner_logos]` shortcode; (2) move 'AI & IT Solutions' from the 1st to the 4th item in the 'What we do' services section.",
+      "action": "Investigated (1) by bootstrapping wp-load.php against this Local site's DB (per the documented run-ID IEpT99PEB technique) and calling hex_get_page_content(8) directly: the live Home page (ID 8) still had the pre-2026-09-02 JSON shape (`logo_strip.names`, an old hardcoded brand-name array) rather than `logo_strip.shortcode` -- the 'Sync Template Updates' meta box/button (functions.php, added 2026-09-02) existed for exactly this but had never been clicked, so the shortcode field was never in the saved JSON for the user to see or edit. Ran the existing hexnity_wp_child_sync_home_page_content_migrations(8) function directly (same one the 'Sync now' button calls) to apply that migration non-destructively -- confirmed live: `logo_strip.shortcode` is now present, `names` is gone, no other page content touched. For (2), reordered services.rows on the live page's already-saved JSON via a small one-off script (moved the 'AI & IT Solutions' row to the end, renumbered num 01-04 to match new order: Energy Broking, Broadband & Mobile, Private Health Cover, AI & IT Solutions) and saved via hex_save_page_content(). Also updated the code-level sources so this order is what any future/reset page gets: template-home.php's $service_rows fallback array and functions.php's hexnity_wp_child_get_template_defaults() 'home' case services.rows array, both reordered identically. Verified both files with php -l (clean) and re-read the live page's saved JSON afterward to confirm both changes persisted. Bumped style.css Version and functions.php HEXNITY_WP_CHILD_VERSION together, 1.20.0 -> 1.20.1.",
+      "files_touched": [
+        "template-home.php",
+        "functions.php",
+        "style.css"
+      ]
+    },
+    {
+      "date": "2026-09-04",
+      "user_requirement": "Turn the logo strip's small label ('Trusted across energy, telecom & insurance') into a centered title, styled like the existing `<h2 class=\"hex-h2\">Four services. One accountable partner.</h2>` section headings.",
+      "action": "template-home.php: changed the logo-strip label from `<span class=\"logo-strip-label hex-h5 font-mono\">` to `<h2 class=\"logo-strip-label hex-h2\">` (same fluid heading class the services/platform section titles use, per TEMPLATE-CONVERSION-GUIDE.md's rule to always reuse one of the 11 existing .hex-* fluid classes). assets/css/src/site-theme.css: `.logo-strip .hex-container` changed from a left-label/right-logos row (`flex; align-items:center`) to a centered column (`flex-direction:column; align-items:center; text-align:center; gap:28px`); `.logo-strip-label`'s small-caps override (letter-spacing/text-transform:uppercase/muted color/170px max-width/line-height) removed so it renders as a real heading (inherits the standard h1-h6 heading color/weight/font), replaced with just a `max-width:32ch` line-wrap constraint; `.logo-strip-names` changed to `justify-content:center` (was `flex:1`, no longer needed once the container isn't a label+content row) so the logo row centers under the title. Also updated the matching 760px mobile breakpoint (removed its `flex-direction:column; align-items:flex-start` override, now redundant/conflicting since the desktop rule is already a centered column). Verified live: bootstrapped wp-load.php against page ID 8 (the Home page) with query_posts()/the_post(), included template-home.php directly, and confirmed the rendered output contains `<h2 class=\"logo-strip-label hex-h2\">Trusted across energy, telecom &amp; insurance</h2>` followed by the centered logo row (the now-registered `[hex_partner_logos]` shortcode — a real logo-slider plugin active on this site — rendered actual logo markup, not placeholder text). php -l clean on template-home.php, brace count balanced (275/275) on site-theme.css. Bumped style.css Version and functions.php HEXNITY_WP_CHILD_VERSION together, 1.20.1 -> 1.20.2.",
+      "files_touched": [
+        "template-home.php",
+        "assets/css/src/site-theme.css",
+        "style.css",
+        "functions.php"
+      ]
+    },
+    {
+      "date": "2026-09-04",
+      "user_requirement": "User reported (pasting the rendered [hex_partner_logos] shortcode HTML) that .hex-container is 1160px wide but .logo-strip-names ends up 1440px wide, adding a horizontal scrollbar to the page -- wanted normal width, no scrollbar.",
+      "action": "Root cause: the now-registered [hex_partner_logos] shortcode is a real logo-slider plugin (GS Logo Slider -- a Swiper carousel that loops/duplicates its 12 logo slides to fill its track, e.g. swiper-slide-duplicate elements). Once the 2026-09-04 centered-title change (see prior action-map.json entry the same day) switched `.logo-strip .hex-container` from `flex-direction:row` to `column`, `.logo-strip-names` lost its old `flex:1` sizing (which had forced it to the row's remaining width) and, as a column flex item under `align-items:center`, was no longer stretched to the container's width -- it sized to its own content instead, i.e. the swiper's full unlooped track width (~1440px), wider than the 1160px .hex-container, causing page-level horizontal overflow. Fixed by adding `width:100%; max-width:100%; overflow:hidden;` to `.logo-strip-names` (assets/css/src/site-theme.css) -- forces it back to the container's actual width and clips/contains the plugin's own swiper markup within it, the standard fix for a 3rd-party carousel shortcode dropped into a constrained column layout; no plugin files touched (out of scope per the folder boundary, and unnecessary -- the fix belongs at the containing element). Verified brace-balanced CSS (275/275) after the edit; this is a pure CSS containment fix with no template markup change, so no separate render test was needed beyond the brace check. Bumped style.css Version and functions.php HEXNITY_WP_CHILD_VERSION together, 1.20.2 -> 1.20.3.",
+      "files_touched": [
+        "assets/css/src/site-theme.css",
+        "style.css",
+        "functions.php"
+      ]
     }
   ]
 }

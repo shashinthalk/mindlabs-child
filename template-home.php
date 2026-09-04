@@ -64,31 +64,31 @@ $logo_strip_shortcode = $content['logo_strip']['shortcode'] ?? '[hex_partner_log
 $service_rows = $content['services']['rows'] ?? array(
 	array(
 		'num'   => '01',
-		'title' => 'AI & IT Solutions',
-		'desc'  => 'Lead scoring, conversation automation, live performance dashboards and sales workflow optimisation, built for regulated Australian retail.',
-		'tags'  => array( 'Intent scoring', 'Voice & chat AI', 'Partner dashboards', 'CRM integration' ),
-		'url'   => '#platform',
-	),
-	array(
-		'num'   => '02',
 		'title' => 'Energy Broking',
 		'desc'  => 'Comparing electricity and gas plans across trusted retailers — balancing price, contract terms and sustainability for households and businesses.',
 		'tags'  => array( 'Residential', 'Small business', 'Solar-aware plans' ),
 		'url'   => '#',
 	),
 	array(
-		'num'   => '03',
+		'num'   => '02',
 		'title' => 'Broadband & Mobile',
 		'desc'  => 'End-to-end telecom plan comparison across pricing, data allowance, network coverage and independent quality benchmarks.',
 		'tags'  => array( 'NBN', 'Mobile', 'Bundles' ),
 		'url'   => '#',
 	),
 	array(
-		'num'   => '04',
+		'num'   => '03',
 		'title' => 'Private Health Cover',
 		'desc'  => 'Policy and provider comparison focused on coverage depth, waiting periods, premium value and business risk protection.',
 		'tags'  => array( 'Hospital', 'Extras', 'Corporate cover' ),
 		'url'   => '#',
+	),
+	array(
+		'num'   => '04',
+		'title' => 'AI & IT Solutions',
+		'desc'  => 'Lead scoring, conversation automation, live performance dashboards and sales workflow optimisation, built for regulated Australian retail.',
+		'tags'  => array( 'Intent scoring', 'Voice & chat AI', 'Partner dashboards', 'CRM integration' ),
+		'url'   => '#platform',
 	),
 );
 
@@ -187,7 +187,7 @@ $contact_form_options = $content['contact']['form_options'] ?? array(
 
   <div class="logo-strip">
     <div class="hex-container">
-      <span class="logo-strip-label hex-h5 font-mono"><?php echo esc_html( $content['logo_strip']['label'] ?? 'Trusted across energy, telecom & insurance' ); ?></span>
+      <h2 class="logo-strip-label hex-h2"><?php echo esc_html( $content['logo_strip']['label'] ?? 'Trusted across energy, telecom & insurance' ); ?></h2>
       <div class="logo-strip-names hex-small"><?php echo do_shortcode( $logo_strip_shortcode ); ?></div>
     </div>
   </div>

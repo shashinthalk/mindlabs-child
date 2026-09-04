@@ -5,7 +5,7 @@ Template: hex-wp-theme-template
 Description: Child theme of Hexnity WP AI Theme. Inherits all templates (Default/Full Width/Canvas page templates, header, footer, single, archive, etc.) automatically via WordPress's template hierarchy — nothing is duplicated here unless it needs to override the parent.
 Author: Nishan Shashintha
 Author URI: https://shashinthalk.cc
-Version: 1.20.0
+Version: 1.20.3
 Requires at least: 6.4
 Requires PHP: 8.0
 Text Domain: hexnity-wp-child

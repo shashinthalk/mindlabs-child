@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HEXNITY_WP_CHILD_VERSION', '1.20.0' );
+define( 'HEXNITY_WP_CHILD_VERSION', '1.20.3' );
 
 /**
  * Registers this theme's custom-logo support so the WordPress core
@@ -559,31 +559,31 @@ function hexnity_wp_child_get_template_defaults( $template_slug ) {
 					'rows'    => array(
 						array(
 							'num'   => '01',
-							'title' => 'AI & IT Solutions',
-							'desc'  => 'Lead scoring, conversation automation, live performance dashboards and sales workflow optimisation, built for regulated Australian retail.',
-							'tags'  => array( 'Intent scoring', 'Voice & chat AI', 'Partner dashboards', 'CRM integration' ),
-							'url'   => '#platform',
-						),
-						array(
-							'num'   => '02',
 							'title' => 'Energy Broking',
 							'desc'  => 'Comparing electricity and gas plans across trusted retailers — balancing price, contract terms and sustainability for households and businesses.',
 							'tags'  => array( 'Residential', 'Small business', 'Solar-aware plans' ),
 							'url'   => '#',
 						),
 						array(
-							'num'   => '03',
+							'num'   => '02',
 							'title' => 'Broadband & Mobile',
 							'desc'  => 'End-to-end telecom plan comparison across pricing, data allowance, network coverage and independent quality benchmarks.',
 							'tags'  => array( 'NBN', 'Mobile', 'Bundles' ),
 							'url'   => '#',
 						),
 						array(
-							'num'   => '04',
+							'num'   => '03',
 							'title' => 'Private Health Cover',
 							'desc'  => 'Policy and provider comparison focused on coverage depth, waiting periods, premium value and business risk protection.',
 							'tags'  => array( 'Hospital', 'Extras', 'Corporate cover' ),
 							'url'   => '#',
+						),
+						array(
+							'num'   => '04',
+							'title' => 'AI & IT Solutions',
+							'desc'  => 'Lead scoring, conversation automation, live performance dashboards and sales workflow optimisation, built for regulated Australian retail.',
+							'tags'  => array( 'Intent scoring', 'Voice & chat AI', 'Partner dashboards', 'CRM integration' ),
+							'url'   => '#platform',
 						),
 					),
 				),
